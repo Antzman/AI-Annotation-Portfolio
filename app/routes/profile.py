@@ -31,7 +31,8 @@ def index():
         if not errors:
             if not any(values.values()):
                 if profile is not None:
-                    db.session.delete(profile)
+                    for field in PROFILE_FIELDS:
+                        setattr(profile, field, None)
                 try:
                     db.session.commit()
                 except SQLAlchemyError:

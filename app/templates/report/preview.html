@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% block page_title %}Report Preview{% endblock %}
+{% block page_title %}Assessment Reports{% endblock %}
 {% block content %}
 <section class="page-heading report-heading">
   <div>
-    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / PORTFOLIO</p>
-    <h1>Report Preview</h1>
-    <p class="heading-copy">Review the content assembled from your saved portfolio before exporting a PDF.</p>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / MY WORK</p>
+    <h1>Assessment Reports</h1>
+    <p class="heading-copy">Review saved annotation observations and quality assessments before exporting a PDF report.</p>
   </div>
   {% if report.has_assessments %}
-  <a class="btn btn-primary action-button" href="{{ url_for('report.download') }}" aria-label="Download PDF portfolio report">
+  <a class="btn btn-primary action-button" href="{{ url_for('report.download') }}" aria-label="Download PDF assessment report">
     <span aria-hidden="true">↓</span> Download PDF
   </a>
   {% else %}
@@ -22,7 +22,7 @@
 
 {% if report.is_complete %}
 <div class="report-status-banner report-status-complete">
-  <strong>Portfolio complete</strong>
+  <strong>Assessments complete</strong>
   <span>All four sections are complete across {{ report.total_assessments }} assessment{% if report.total_assessments != 1 %}s{% endif %}.</span>
 </div>
 {% elif report.has_assessments %}
@@ -40,7 +40,7 @@
 <section class="report-summary-grid" aria-label="Report summary">
   <article class="report-summary-card"><span>Generated</span><strong>{{ report.generated_at.strftime("%B %d, %Y") }}</strong></article>
   <article class="report-summary-card"><span>Assessments</span><strong>{{ report.completed_assessments }} / {{ report.total_assessments }} complete</strong></article>
-  <article class="report-summary-card"><span>Portfolio progress</span><strong>{{ report.completion }}%</strong></article>
+  <article class="report-summary-card"><span>Assessment progress</span><strong>{{ report.completion }}%</strong></article>
   <article class="report-summary-card">
     <span>Mean quality score</span>
     <strong>{% if report.average_quality_score is not none %}{{ "%.1f"|format(report.average_quality_score) }} / 10{% else %}Not available{% endif %}</strong>
@@ -49,7 +49,7 @@
 
 <section class="panel report-panel" aria-labelledby="report-cover-title">
   <div class="panel-heading">
-    <div><p class="eyebrow">COVER PAGE</p><h2 id="report-cover-title">AI Annotation Portfolio Report</h2></div>
+    <div><p class="eyebrow">COVER PAGE</p><h2 id="report-cover-title">AI Annotation Assessment Report</h2></div>
     <span class="report-draft-label">{% if report.is_complete %}COMPLETE{% else %}DRAFT{% endif %}</span>
   </div>
   <dl class="report-facts">
@@ -61,13 +61,13 @@
 
 <section class="panel report-panel" aria-labelledby="report-introduction-title">
   <div class="panel-heading">
-    <div><p class="eyebrow">PERSONAL INTRODUCTION</p><h2 id="report-introduction-title">About the author</h2></div>
+    <div><p class="eyebrow">ANNOTATOR PROFILE</p><h2 id="report-introduction-title">Professional introduction</h2></div>
     <a class="text-action" href="{{ url_for('profile.index') }}">Edit profile <span aria-hidden="true">→</span></a>
   </div>
   {% if report.profile and report.profile.introduction %}
   <p class="report-copy">{{ report.profile.introduction }}</p>
   {% else %}
-  <p class="report-empty-copy">No professional introduction provided. Add one in About to personalize the report.</p>
+  <p class="report-empty-copy">No professional introduction provided. Add one in your annotator profile.</p>
   {% endif %}
   <div class="report-profile-grid">
     <div><h3>Relevant experience</h3><p>{{ report.profile.experience if report.profile and report.profile.experience else 'Not provided.' }}</p></div>
@@ -90,7 +90,7 @@
   <p class="report-empty-copy">Counts reflect saved work only; they are not an independent certification.</p>
   <div class="table-responsive">
     <table class="table table-bordered report-table">
-      <thead><tr><th scope="col">Competency area</th><th scope="col">Evidence in this portfolio</th></tr></thead>
+      <thead><tr><th scope="col">Competency area</th><th scope="col">Assessment evidence</th></tr></thead>
       <tbody>
         <tr><th scope="row">Object &amp; Action Identification</th><td>{% set object_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set object_count.value = object_count.value + (exercise.object_action_observations|length) %}{% endfor %}{{ object_count.value }} saved observations</td></tr>
         <tr><th scope="row">Movement Analysis</th><td>{% set movement_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set movement_count.value = movement_count.value + (exercise.movement_observations|length) %}{% endfor %}{{ movement_count.value }} saved observations</td></tr>
@@ -216,7 +216,7 @@
     Incomplete results are labeled, and no overall quality score is reported until all five category ratings are saved.
   </p>
   {% else %}
-  <p>No assessment results are available. Create an assessment and record your observations before presenting a portfolio.</p>
+  <p>No assessment results are available. Create an assessment and record your observations before exporting a report.</p>
   {% endif %}
 </section>
 {% endblock %}

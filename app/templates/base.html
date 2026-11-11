@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f4f7fb">
-  <title>{% block page_title %}Dashboard{% endblock %} · AI Annotation Portfolio</title>
+  <title>{% block page_title %}Dashboard{% endblock %} · AI Annotation Studio</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
@@ -12,8 +12,8 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="{{ url_for('dashboard.index') }}">
-        <span class="brand-mark" aria-hidden="true">A</span>
-        <span><strong>Annotation</strong><small>Portfolio Studio</small></span>
+        <span class="brand-mark" aria-hidden="true">AI</span>
+        <span><strong>AI Annotation</strong><small>Studio</small></span>
       </a>
       <nav class="primary-nav" aria-label="Main navigation">
         <span class="nav-caption">WORKSPACE</span>
@@ -24,7 +24,7 @@
         <span class="nav-caption nav-caption-spaced">ASSESSMENTS</span>
         <a class="nav-link{% if active_nav == 'object-action' %} active{% endif %}"
            href="{{ url_for('object_action.index') }}" {% if active_nav == 'object-action' %}aria-current="page"{% endif %}>
-          <span class="nav-icon" aria-hidden="true">◉</span>Object &amp; Action
+          <span class="nav-icon" aria-hidden="true">◉</span>Object &amp; Action Identification
         </a>
         <a class="nav-link{% if active_nav == 'movement-analysis' %} active{% endif %}"
            href="{{ url_for('movement.index') }}" {% if active_nav == 'movement-analysis' %}aria-current="page"{% endif %}>
@@ -32,31 +32,31 @@
         </a>
         <a class="nav-link{% if active_nav == 'video-quality' %} active{% endif %}"
            href="{{ url_for('quality.index') }}" {% if active_nav == 'video-quality' %}aria-current="page"{% endif %}>
-          <span class="nav-icon" aria-hidden="true">◫</span>Video Quality
+          <span class="nav-icon" aria-hidden="true">◫</span>Video Quality Assessment
         </a>
         <a class="nav-link{% if active_nav == 'attention-to-detail' %} active{% endif %}"
            href="{{ url_for('attention.index') }}" {% if active_nav == 'attention-to-detail' %}aria-current="page"{% endif %}>
           <span class="nav-icon" aria-hidden="true">◎</span>Attention to Detail
         </a>
-        <span class="nav-caption nav-caption-spaced">PORTFOLIO</span>
+        <span class="nav-caption nav-caption-spaced">MY WORK</span>
         <a class="nav-link{% if active_nav == 'report-preview' %} active{% endif %}"
            href="{{ url_for('report.preview') }}" {% if active_nav == 'report-preview' %}aria-current="page"{% endif %}>
-          <span class="nav-icon" aria-hidden="true">▤</span>Report Preview
+          <span class="nav-icon" aria-hidden="true">▤</span>Assessment Reports
         </a>
         <a class="nav-link{% if active_nav == 'about' %} active{% endif %}"
            href="{{ url_for('profile.index') }}" {% if active_nav == 'about' %}aria-current="page"{% endif %}>
-          <span class="nav-icon" aria-hidden="true">ⓘ</span>About
+          <span class="nav-icon" aria-hidden="true">ⓘ</span>Annotator Profile
         </a>
       </nav>
       <div class="sidebar-footer">
         <span class="local-indicator" aria-hidden="true"></span>
-        <span><strong>Local workspace</strong><small>Your data stays on this device</small></span>
+        <span><strong>Demonstration workspace</strong><small>– data may reset periodically.</small></span>
       </div>
     </aside>
 
     <main class="main-content">
       <header class="topbar">
-        <div class="mobile-brand"><span class="brand-mark" aria-hidden="true">A</span>Annotation Portfolio</div>
+        <div class="mobile-brand"><span class="brand-mark" aria-hidden="true">AI</span>AI Annotation Studio</div>
         <span class="topbar-context">AI VIDEO ANNOTATION</span>
         <a class="topbar-profile" href="{{ url_for('profile.index') }}" aria-label="Edit profile">
           <span class="profile-avatar" aria-hidden="true">◎</span><span>My profile</span>

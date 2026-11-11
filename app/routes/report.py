@@ -29,7 +29,7 @@ def download():
                 active_nav="report-preview",
                 report=report,
                 download_error=(
-                    "Create at least one assessment before exporting a portfolio report."
+                    "Create at least one assessment before exporting an assessment report."
                 ),
             ),
             409,
@@ -39,7 +39,7 @@ def download():
     profile_name = (
         secure_filename(report["profile"].name)
         if report["profile"] and report["profile"].name
-        else "AI-Annotation-Portfolio"
+        else "AI-Annotation-Studio"
     )
     filename = (
         f"{profile_name}-report-{report['generated_at'].strftime('%Y-%m-%d')}.pdf"

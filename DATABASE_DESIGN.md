@@ -2,7 +2,7 @@
 
 ## Storage and scope
 
-Use SQLite through SQLAlchemy, with the database file in the local Flask `instance\` directory. The first release is a single-user local portfolio: there is one editable profile and no account, cloud sync, or remote database. Clip references are plain text; no video or other media files are stored.
+Use SQLite through SQLAlchemy, with the database file in the Flask `instance\` directory. The application is a single-user annotation workspace: there is one editable profile and no account, cloud sync, or remote database. Clip references are plain text; no video or other media files are stored.
 
 Tables use integer primary keys and UTC creation/update timestamps where relevant. Text is stored as entered after server-side trimming and length validation. Controlled values are checked in application validation and, where practical, database constraints.
 
@@ -10,7 +10,7 @@ Tables use integer primary keys and UTC creation/update timestamps where relevan
 
 ### `user_profiles`
 
-One profile row for the local portfolio.
+One profile row for the annotation workspace.
 
 - `id` — primary key, restricted to `1` to enforce one profile
 - `name` — optional display name

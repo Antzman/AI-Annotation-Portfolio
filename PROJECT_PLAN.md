@@ -2,7 +2,7 @@
 
 ## Product scope
 
-Build a responsive, local-first Flask application for manually recording video-annotation observations and presenting them in a PDF portfolio. Users provide text references to clips; the application will not accept video uploads, call external APIs, or perform video processing or AI analysis.
+Build a responsive Flask application for manually recording video-annotation observations and presenting assessment reports. Users provide text references to clips; the application will not accept video uploads, call external APIs, or perform video processing or AI analysis.
 
 The interface will use a fixed desktop sidebar that adapts for small screens, a blue/white/light-grey palette, accessible forms, and Bootstrap 5 served locally with its MIT license notice. SQLite data and generated reports remain on the user's machine.
 
@@ -42,7 +42,7 @@ The schema and relationships are described in [DATABASE_DESIGN.md](DATABASE_DESI
 3. Video Quality Assessment is complete when all five category ratings and their explanations are saved for an assessment.
 4. Attention to Detail is complete when the user explicitly marks the section reviewed. A reviewed section may contain zero issues, so users can truthfully record that none were observed.
 
-Portfolio completion is the percentage of the four required section checks completed across all exercises. An assessment counts as complete only when all four checks are complete for that exercise. A section is complete when every assessment meets its rule, in progress when some do, and not started when none do. Report preview/export will label incomplete sections and will never invent scores, observations, or a completed result. Quality scores will be calculated only from saved ratings.
+Assessment progress is the percentage of the four required section checks completed across all exercises. An assessment counts as complete only when all four checks are complete for that exercise. A section is complete when every assessment meets its rule, in progress when some do, and not started when none do. Assessment reports will label incomplete sections and will never invent scores, observations, or a completed result. Quality scores will be calculated only from saved ratings.
 
 ## Development phases and approval gates
 
@@ -87,7 +87,7 @@ Implementation starts only after approval of the proposed database design and ph
 - Add controlled-value and section-status tests.
 - **Exit check:** users can record multiple issues or mark a review complete with no issues without ambiguity. Issue changes invalidate prior review state. Verified: 34 tests pass.
 
-### Phase 7 — Report Preview and PDF generation — Complete
+### Phase 7 — Assessment Reports and PDF generation — Complete
 
 - Add a preview assembled from actual profile and assessment data, then local ReportLab PDF export.
 - Include cover, optional profile introduction/skills, results, assessment score/explanations, incomplete-section notices, conclusion, generation date, tables, and page numbers.

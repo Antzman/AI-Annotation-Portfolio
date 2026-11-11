@@ -23,9 +23,6 @@ def test_app_factory_creates_database_and_instance_folder(app):
 
 
 def test_profile_is_limited_to_singleton_row(session):
-    session.add(UserProfile(name="Portfolio owner"))
-    session.commit()
-
     session.add(UserProfile(id=2, name="Second profile"))
     with pytest.raises(IntegrityError):
         session.commit()

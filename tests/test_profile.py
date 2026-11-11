@@ -28,6 +28,8 @@ def _profile_form(token, **overrides):
 def test_profile_can_be_saved_and_included_in_report_preview(app, session):
     client = app.test_client()
     page = client.get("/about")
+    assert b'value="Ant"' in page.data
+    assert b"South African technology enthusiast" in page.data
     response = client.post(
         "/about",
         data=_profile_form(_token(page)),
@@ -41,6 +43,7 @@ def test_profile_can_be_saved_and_included_in_report_preview(app, session):
 
     preview = client.get("/report-preview")
     assert preview.status_code == 200
+    assert b"Assessment Reports" in preview.data
     assert b"Alex Example" in preview.data
     assert b"Evidence-based reasoning" in preview.data
     assert b"alex@example.test" in preview.data
@@ -55,7 +58,7 @@ def test_profile_lengths_are_validated_and_data_can_be_cleared(app, session):
     )
     assert invalid.status_code == 400
     assert b"Name must be 120 characters or fewer" in invalid.data
-    assert session.query(UserProfile).count() == 0
+    assert session.query(UserProfile).one().name == "Ant"
 
     page = client.get("/about")
     saved = client.post("/about", data=_profile_form(_token(page)))
@@ -74,4 +77,15 @@ def test_profile_lengths_are_validated_and_data_can_be_cleared(app, session):
         },
     )
     assert cleared.status_code == 302
-    assert session.query(UserProfile).count() == 0
+    cleared_profile = session.query(UserProfile).one()
+    assert all(
+        getattr(cleared_profile, field) is None
+        for field in (
+            "name",
+            "introduction",
+            "experience",
+            "technical_interests",
+            "skills",
+            "contact_information",
+        )
+    )

@@ -13,6 +13,7 @@ from app.services.schema import (
     migrate_legacy_section_reviews,
     migrate_quality_issue_timestamps,
 )
+from app.services.profile_defaults import ensure_default_profile
 
 
 @event.listens_for(Engine, "connect")
@@ -59,6 +60,7 @@ def create_app(test_config=None):
         migrate_legacy_section_reviews(db.engine)
         db.create_all()
         migrate_quality_issue_timestamps(db.engine)
+        ensure_default_profile()
 
     from app.routes import dashboard
     from app.routes import attention

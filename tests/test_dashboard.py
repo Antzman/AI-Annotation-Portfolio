@@ -51,7 +51,20 @@ def test_dashboard_empty_database_shows_zero_completion_and_not_started(app):
     response = client.get("/")
 
     assert response.status_code == 200
-    assert b"Portfolio completion" in response.data
+    assert b"Annotation Dashboard" in response.data
+    assert b"Manage video annotation exercises, record observations" in response.data
+    assert b"Assessment Progress" in response.data
+    assert b"Active Assessments" in response.data
+    assert b"Completed Assessments" in response.data
+    assert b"Recent Activity" in response.data
+    assert b"AI Annotation Studio" in response.data
+    assert b"Assessment Reports" in response.data
+    assert b"Object &amp; Action Identification" in response.data
+    assert b"Movement Analysis" in response.data
+    assert b"Video Quality Assessment" in response.data
+    assert b"Attention to Detail" in response.data
+    assert b"Demonstration workspace" in response.data
+    assert b"data may reset periodically" in response.data
     assert b"0 of 0 assessments complete" in response.data
     assert response.data.count(b"Not started") == 4
     assert b"No activity yet" in response.data
@@ -133,7 +146,8 @@ def test_navigation_routes_and_vendor_assets_are_local(app):
 
     profile_response = client.get("/about")
     assert profile_response.status_code == 200
-    assert b"Professional information" in profile_response.data
+    assert b"Annotator Profile" in profile_response.data
+    assert b"Ant" in profile_response.data
     assert b"https://" not in profile_response.data
 
     response = client.get("/static/vendor/bootstrap/bootstrap.min.css")

@@ -252,7 +252,7 @@ def _draw_page(canvas, document):
         )
         canvas.setFont("Vera-Bold", 7)
         canvas.setFillColor(MUTED)
-        canvas.drawString(PAGE_MARGIN, PAGE_HEIGHT - 0.37 * inch, "AI ANNOTATION PORTFOLIO")
+        canvas.drawString(PAGE_MARGIN, PAGE_HEIGHT - 0.37 * inch, "AI ANNOTATION STUDIO")
     canvas.setStrokeColor(GRID)
     canvas.setLineWidth(0.5)
     canvas.line(PAGE_MARGIN, 0.48 * inch, PAGE_WIDTH - PAGE_MARGIN, 0.48 * inch)
@@ -274,7 +274,7 @@ def _cover(story, report, styles):
         [
             Spacer(1, 1.15 * inch),
             _paragraph("MANUAL VIDEO ANNOTATION", styles["cover-kicker"]),
-            _paragraph("Portfolio Report", styles["cover-title"]),
+            _paragraph("Assessment Report", styles["cover-title"]),
             _paragraph(
                 "Observation, movement and footage quality assessment",
                 styles["cover-subtitle"],
@@ -294,7 +294,7 @@ def _cover(story, report, styles):
             ),
         ],
         [
-            _paragraph("PORTFOLIO STATUS", styles["cover-label"]),
+            _paragraph("REPORT STATUS", styles["cover-label"]),
             _paragraph(status, styles["cover-value"]),
         ],
         [
@@ -305,7 +305,7 @@ def _cover(story, report, styles):
             ),
         ],
         [
-            _paragraph("PORTFOLIO COMPLETION", styles["cover-label"]),
+            _paragraph("ASSESSMENT PROGRESS", styles["cover-label"]),
             _paragraph(f'{report["completion"]}%', styles["cover-value"]),
         ],
     ]
@@ -404,7 +404,7 @@ def _profile_section(story, report, styles):
     competency_rows = [
         [
             _paragraph("Competency area", styles["table-header"]),
-            _paragraph("Evidence in this portfolio", styles["table-header"]),
+            _paragraph("Evidence in these assessments", styles["table-header"]),
         ]
     ]
     competency_rows.extend(
@@ -676,7 +676,7 @@ def _conclusion(story, report, styles):
             if section["status"] != "complete"
         ]
         conclusion = (
-            "This is a draft portfolio. The following sections are incomplete across "
+            "This is a draft assessment report. The following sections are incomplete across "
             "one or more assessments: "
             + ", ".join(pending)
             + ". Incomplete results are labeled, and no overall quality score is "
@@ -685,12 +685,12 @@ def _conclusion(story, report, styles):
     else:
         conclusion = (
             "No assessment results are available. Create an assessment and record "
-            "your observations before presenting a portfolio."
+            "your observations before exporting an assessment report."
         )
     story.append(_paragraph(conclusion, styles["body"]))
     story.append(
         _paragraph(
-            "This portfolio reflects the author's own observations and explanations. "
+            "This report reflects the author's own observations and explanations. "
             "Clip references are text only; no video was uploaded, included, or processed.",
             styles["small"],
         )
@@ -702,7 +702,7 @@ def generate_pdf(report):
     display_name = (
         report["profile"].name
         if report["profile"] and report["profile"].name
-        else "AI Annotation Portfolio"
+        else "AI Annotation Studio"
     )
     document = SimpleDocTemplate(
         output,
@@ -711,7 +711,7 @@ def generate_pdf(report):
         rightMargin=PAGE_MARGIN,
         topMargin=0.68 * inch,
         bottomMargin=0.72 * inch,
-        title="AI Annotation Portfolio Report",
+        title="AI Annotation Studio Assessment Report",
         author=display_name,
     )
     styles = _styles()

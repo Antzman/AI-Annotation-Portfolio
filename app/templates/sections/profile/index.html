@@ -3,16 +3,16 @@
 {% block content %}
 <section class="page-heading">
   <div>
-    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / PORTFOLIO</p>
-    <h1>About</h1>
-    <p class="heading-copy">Add the personal and professional details you want included in your portfolio report.</p>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / MY WORK</p>
+    <h1>Annotator Profile</h1>
+    <p class="heading-copy">Maintain the professional profile included with your annotation assessment reports.</p>
   </div>
 </section>
 
 <section class="panel profile-form-panel" aria-labelledby="profile-form-title">
   <div class="panel-heading">
     <div><p class="eyebrow">YOUR PROFILE</p><h2 id="profile-form-title">Professional information</h2></div>
-    <span class="panel-tag">Stored locally</span>
+    <span class="panel-tag">Editable profile</span>
   </div>
   {% if errors %}
   <div class="alert alert-danger form-errors" role="alert">
@@ -45,9 +45,9 @@
         <div class="form-text">Use separate lines if you want a list in the report.</div>
       </div>
       <div class="col-md-6">
-        <label class="form-label" for="contact_information">Contact information</label>
+        <label class="form-label" for="contact_information">Contact information (optional)</label>
         <textarea class="form-control" id="contact_information" name="contact_information" rows="4" maxlength="500">{{ values.contact_information }}</textarea>
-        <div class="form-text">This is included in exported reports when provided.</div>
+        <div class="form-text">Optional; included in exported reports when provided.</div>
       </div>
     </div>
     <div class="form-actions">

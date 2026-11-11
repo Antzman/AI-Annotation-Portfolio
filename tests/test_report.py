@@ -65,16 +65,13 @@ def _populate_complete_assessment(session, long_text=False):
     )
     exercise.section_reviews.append(review)
     session.add(exercise)
-    profile = UserProfile(
-        id=1,
-        name="Jordan Reviewer",
-        introduction="I focus on clear, evidence-led annotation.",
-        experience="Portfolio practice.",
-        technical_interests="Video quality and movement.",
-        skills="Careful observation\nConsistent timestamps",
-        contact_information="jordan@example.test",
-    )
-    session.add(profile)
+    profile = session.get(UserProfile, 1)
+    profile.name = "Jordan Reviewer"
+    profile.introduction = "I focus on clear, evidence-led annotation."
+    profile.experience = "Assessment practice."
+    profile.technical_interests = "Video quality and movement."
+    profile.skills = "Careful observation\nConsistent timestamps"
+    profile.contact_information = "jordan@example.test"
     session.commit()
     return exercise
 
@@ -152,7 +149,8 @@ def test_pdf_page_footer_includes_current_page_number():
 
 
 def test_report_preview_escapes_profile_markup(app, session):
-    session.add(UserProfile(id=1, name="<script>alert(1)</script>"))
+    profile = session.get(UserProfile, 1)
+    profile.name = "<script>alert(1)</script>"
     session.add(Exercise(title="Safe display"))
     session.commit()
 
