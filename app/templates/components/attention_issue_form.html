@@ -1,0 +1,54 @@
+<form method="post" action="{{ form_action }}" class="observation-form attention-form">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  {% if errors %}
+  <div class="alert alert-danger form-errors" role="alert">
+    <p>Please correct the following:</p>
+    <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label" for="issue-timestamp">Timestamp <span class="required-mark">*</span></label>
+      <input class="form-control" id="issue-timestamp" name="timestamp" value="{{ values.timestamp }}"
+             placeholder="00:00-00:03" maxlength="80" required>
+      <div class="form-text">MM:SS or HH:MM:SS; optional range.</div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="issue-category">Issue category <span class="required-mark">*</span></label>
+      <select class="form-select" id="issue-category" name="category" required>
+        <option value="">Select category</option>
+        {% for value, label in issue_categories.items() %}
+        <option value="{{ value }}" {% if values.category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="issue-severity">Severity <span class="required-mark">*</span></label>
+      <select class="form-select" id="issue-severity" name="severity" required>
+        <option value="">Select severity</option>
+        {% for value, label in severity_options.items() %}
+        <option value="{{ value }}" {% if values.severity == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="issue-description">Issue description <span class="required-mark">*</span></label>
+      <textarea class="form-control" id="issue-description" name="description"
+                rows="2" maxlength="4000" required>{{ values.description }}</textarea>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="issue-explanation">Explanation <span class="required-mark">*</span></label>
+      <textarea class="form-control" id="issue-explanation" name="explanation"
+                rows="3" maxlength="4000" required>{{ values.explanation }}</textarea>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="suggested-correction">Suggested annotation or correction <span class="optional-mark">Optional</span></label>
+      <textarea class="form-control" id="suggested-correction" name="suggested_correction"
+                rows="2" maxlength="4000">{{ values.suggested_correction }}</textarea>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
+    {% if cancel_url %}<a class="btn btn-light" href="{{ cancel_url }}">Cancel</a>{% endif %}
+  </div>
+</form>

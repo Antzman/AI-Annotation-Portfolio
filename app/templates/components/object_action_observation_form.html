@@ -1,0 +1,36 @@
+<form method="post" action="{{ form_action }}" class="observation-form">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  {% if errors %}
+  <div class="alert alert-danger form-errors" role="alert">
+    <p>Please correct the following:</p>
+    <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label" for="timestamp">Timestamp <span class="required-mark">*</span></label>
+      <input class="form-control" id="timestamp" name="timestamp" value="{{ values.timestamp }}"
+             placeholder="00:00-00:03" maxlength="80" required>
+      <div class="form-text">MM:SS or HH:MM:SS; optional range.</div>
+    </div>
+    <div class="col-md-8">
+      <label class="form-label" for="identified_object">Identified object <span class="required-mark">*</span></label>
+      <input class="form-control" id="identified_object" name="identified_object"
+             value="{{ values.identified_object }}" maxlength="160" required>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="observed_action">Observed action <span class="required-mark">*</span></label>
+      <textarea class="form-control" id="observed_action" name="observed_action" rows="3"
+                maxlength="4000" required>{{ values.observed_action }}</textarea>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="additional_observations">Additional observations <span class="optional-mark">Optional</span></label>
+      <textarea class="form-control" id="additional_observations" name="additional_observations"
+                rows="2" maxlength="4000">{{ values.additional_observations }}</textarea>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
+    {% if cancel_url %}<a class="btn btn-light" href="{{ cancel_url }}">Cancel</a>{% endif %}
+  </div>
+</form>

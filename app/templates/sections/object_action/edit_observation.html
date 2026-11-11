@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block page_title %}Edit observation · {{ exercise.title }}{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('object_action.detail', exercise_id=exercise.id) }}">{{ exercise.title }}</a> / EDIT</p>
+    <h1>Edit observation</h1>
+    <p class="heading-copy">Update the timestamp or refine the recorded finding.</p>
+  </div>
+</section>
+<section class="panel observation-entry-panel edit-observation-panel" aria-labelledby="edit-observation-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">OBJECT &amp; ACTION</p><h2 id="edit-observation-title">Observation details</h2></div>
+  </div>
+  {% set form_action = url_for('object_action.edit_observation', observation_id=observation.id) %}
+  {% set submit_label = 'Save changes' %}
+  {% set cancel_url = url_for('object_action.detail', exercise_id=exercise.id) %}
+  {% include "components/object_action_observation_form.html" %}
+</section>
+{% endblock %}

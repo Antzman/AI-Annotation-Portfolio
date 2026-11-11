@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block page_title %}Attention to Detail{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>
+    <h1>Attention to Detail</h1>
+    <p class="heading-copy">Record potential issues or confirm that you reviewed an assessment and found none.</p>
+  </div>
+</section>
+
+<section class="assessments-section attention-assessments" aria-labelledby="attention-assessments-title">
+  <div class="list-heading">
+    <div><p class="eyebrow">YOUR WORK</p><h2 id="attention-assessments-title">Choose an assessment</h2></div>
+    <span class="panel-tag">{{ exercises|length }} total</span>
+  </div>
+  {% if exercises %}
+  <div class="assessment-list">
+    {% for exercise in exercises %}
+    {% set review = namespace(done=false) %}
+    {% for item in exercise.section_reviews %}
+      {% if item.section_key == 'attention_to_detail' and item.reviewed_at %}{% set review.done = true %}{% endif %}
+    {% endfor %}
+    <article class="assessment-card">
+      <span class="assessment-card-icon attention-card-icon" aria-hidden="true">◎</span>
+      <div class="assessment-card-body">
+        <h3><a href="{{ url_for('attention.detail', exercise_id=exercise.id) }}">{{ exercise.title }}</a></h3>
+        <p>{{ exercise.clip_reference or 'No clip reference added' }}</p>
+      </div>
+      {% if review.done %}
+      <span class="quality-status quality-complete">Reviewed</span>
+      {% elif exercise.quality_issues %}
+      <span class="quality-status quality-incomplete">Review needed</span>
+      {% else %}
+      <span class="quality-status quality-incomplete">Not started</span>
+      {% endif %}
+      <span class="observation-count">{{ exercise.quality_issues|length }} issue{% if exercise.quality_issues|length != 1 %}s{% endif %}</span>
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('attention.detail', exercise_id=exercise.id) }}">Open assessment</a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="panel empty-assessments">
+    <span class="empty-icon" aria-hidden="true">◎</span>
+    <h3>No assessments available</h3>
+    <p>Create an assessment in Object &amp; Action Identification before reviewing it for detail issues.</p>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

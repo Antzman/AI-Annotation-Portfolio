@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block page_title %}Save error{% endblock %}
+{% block content %}
+<section class="panel phase-card" role="alert">
+  <span class="phase-icon error-icon" aria-hidden="true">!</span>
+  <p class="eyebrow">DATABASE ERROR</p>
+  <h1 class="error-title">Your change was not saved</h1>
+  <p>{{ message }}</p>
+  <a class="btn btn-outline-primary" href="{{ back_url }}">Return to the assessment</a>
+</section>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block page_title %}Object &amp; Action Identification{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>
+    <h1>Object &amp; Action Identification</h1>
+    <p class="heading-copy">Create an assessment for a clip reference, then add observations at specific timestamps.</p>
+  </div>
+</section>
+
+<section class="panel create-assessment-panel" aria-labelledby="create-assessment-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">GET STARTED</p><h2 id="create-assessment-title">Create an assessment</h2></div>
+    <span class="panel-tag">Text references only</span>
+  </div>
+  <form method="post" action="{{ url_for('object_action.index') }}" class="assessment-form">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    {% if errors %}
+    <div class="alert alert-danger form-errors" role="alert">
+      <p>Please correct the following:</p>
+      <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label" for="title">Exercise title <span class="required-mark">*</span></label>
+        <input class="form-control" id="title" name="title" value="{{ values.title }}"
+               maxlength="160" placeholder="e.g. Person entering a room" required>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label" for="clip_reference">Video or clip reference <span class="optional-mark">Optional</span></label>
+        <input class="form-control" id="clip_reference" name="clip_reference"
+               value="{{ values.clip_reference }}" maxlength="300" placeholder="e.g. Training clip 01">
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">Create assessment</button>
+      </div>
+    </div>
+    <p class="privacy-note"><span aria-hidden="true">ⓘ</span> Do not upload a video. Add a text-only reference; your clip stays outside this app.</p>
+  </form>
+</section>
+
+<section class="assessments-section" aria-labelledby="assessments-title">
+  <div class="list-heading">
+    <div><p class="eyebrow">YOUR WORK</p><h2 id="assessments-title">Assessments</h2></div>
+    <span class="panel-tag">{{ exercises|length }} total</span>
+  </div>
+  {% if exercises %}
+  <div class="assessment-list">
+    {% for exercise in exercises %}
+    <article class="assessment-card">
+      <span class="assessment-card-icon" aria-hidden="true">▤</span>
+      <div class="assessment-card-body">
+        <h3><a href="{{ url_for('object_action.detail', exercise_id=exercise.id) }}">{{ exercise.title }}</a></h3>
+        <p>{{ exercise.clip_reference or 'No clip reference added' }}</p>
+      </div>
+      <span class="observation-count">{{ exercise.object_action_observations|length }} observations</span>
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.detail', exercise_id=exercise.id) }}">Open assessment</a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="panel empty-assessments">
+    <span class="empty-icon" aria-hidden="true">◉</span>
+    <h3>No assessments yet</h3>
+    <p>Create an assessment above to start recording timestamped object and action observations.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

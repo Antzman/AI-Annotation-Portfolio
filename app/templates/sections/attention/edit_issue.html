@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block page_title %}Edit issue · {{ exercise.title }}{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('attention.detail', exercise_id=exercise.id) }}">{{ exercise.title }}</a> / EDIT</p>
+    <h1>Edit detail issue</h1>
+    <p class="heading-copy">Update the issue, severity, explanation, or suggested correction.</p>
+  </div>
+</section>
+<section class="panel observation-entry-panel edit-observation-panel" aria-labelledby="edit-issue-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">ATTENTION TO DETAIL</p><h2 id="edit-issue-title">Issue details</h2></div>
+  </div>
+  {% set form_action = url_for('attention.edit_issue', issue_id=issue.id) %}
+  {% set submit_label = 'Save changes' %}
+  {% set cancel_url = url_for('attention.detail', exercise_id=exercise.id) %}
+  {% set issue_categories = issue_categories %}
+  {% set severity_options = severity_options %}
+  {% include "components/attention_issue_form.html" %}
+</section>
+{% endblock %}

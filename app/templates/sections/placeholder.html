@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">PORTFOLIO WORKSPACE</p>
+    <h1>{{ title }}</h1>
+    <p class="heading-copy">{{ description }}</p>
+  </div>
+</section>
+<section class="panel phase-card">
+  <span class="phase-icon" aria-hidden="true">✦</span>
+  <p class="eyebrow">PLANNED WORK</p>
+  <h2>This section is not available yet</h2>
+  <p>{{ title }} will be implemented in <strong>{{ phase }}</strong>. No assessment has been recorded here yet.</p>
+  <a class="btn btn-outline-primary" href="{{ url_for('dashboard.index') }}">Back to dashboard</a>
+</section>
+{% endblock %}

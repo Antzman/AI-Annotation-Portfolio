@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">YOUR WORKSPACE</p>
+    <h1>Dashboard</h1>
+    <p class="heading-copy">Track your assessment work and build a clear picture of your progress.</p>
+  </div>
+  <a class="btn btn-primary action-button" href="{{ url_for('object_action.index') }}">
+    <span aria-hidden="true">＋</span> Start an assessment
+  </a>
+</section>
+
+<section class="summary-grid" aria-label="Portfolio summary">
+  <article class="summary-card completion-card">
+    <div class="summary-topline"><span>Portfolio completion</span><span class="metric-icon blue-icon" aria-hidden="true">↗</span></div>
+    <div class="metric-value">{{ dashboard.completion }}<span class="metric-unit">%</span></div>
+    <div class="progress completion-progress" role="progressbar" aria-label="Portfolio completion"
+         aria-valuenow="{{ dashboard.completion }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar" style="width: {{ dashboard.completion }}%"></div>
+    </div>
+    <p class="metric-caption">{{ dashboard.completed_assessments }} of {{ dashboard.total_assessments }} assessments complete</p>
+  </article>
+  <article class="summary-card">
+    <div class="summary-topline"><span>Completed assessments</span><span class="metric-icon green-icon" aria-hidden="true">✓</span></div>
+    <div class="metric-value">{{ dashboard.completed_assessments }}</div>
+    <p class="metric-caption">of {{ dashboard.total_assessments }} started</p>
+  </article>
+  <article class="summary-card">
+    <div class="summary-topline"><span>Assessments in progress</span><span class="metric-icon amber-icon" aria-hidden="true">◷</span></div>
+    <div class="metric-value">{{ dashboard.in_progress_assessments }}</div>
+    <p class="metric-caption">with at least one section underway</p>
+  </article>
+</section>
+
+<div class="dashboard-columns">
+  <section class="panel section-panel" aria-labelledby="section-progress-title">
+    <div class="panel-heading">
+      <div><p class="eyebrow">ASSESSMENT WORKFLOW</p><h2 id="section-progress-title">Section progress</h2></div>
+      <span class="panel-tag">4 sections</span>
+    </div>
+    <div class="section-list">
+      {% for section in dashboard.sections %}
+      <article class="section-row">
+        <span class="section-symbol symbol-{{ section.key }}" aria-hidden="true">
+          {% if section.key == 'object_action' %}◉{% elif section.key == 'movement' %}↗{% elif section.key == 'quality' %}◫{% else %}◎{% endif %}
+        </span>
+        <div class="section-info">
+          <div class="section-title-row"><h3>{{ section.label }}</h3>
+            <span class="status-badge status-{{ section.status }}">
+              {% if section.status == 'complete' %}Complete{% elif section.status == 'in_progress' %}In progress{% else %}Not started{% endif %}
+            </span>
+          </div>
+          <div class="section-progress-row">
+            <div class="progress section-progress" role="progressbar" aria-label="{{ section.label }} progress"
+                 aria-valuenow="{{ section.complete_count }}" aria-valuemin="0" aria-valuemax="{{ section.total_count }}">
+              {% if section.total_count %}
+              <div class="progress-bar" style="width: {{ (section.complete_count / section.total_count * 100)|round(0, 'common') }}%"></div>
+              {% endif %}
+            </div>
+            <span class="section-count">
+              {% if section.status == 'in_progress' %}{{ section.started_count }}/{{ section.total_count }} active
+              {% else %}{{ section.complete_count }}/{{ section.total_count }}{% endif %}
+            </span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel activity-panel" aria-labelledby="activity-title">
+    <div class="panel-heading">
+      <div><p class="eyebrow">LATEST UPDATES</p><h2 id="activity-title">Recent activity</h2></div>
+      {% if dashboard.recent_activity %}<span class="activity-count">{{ dashboard.recent_activity|length }}</span>{% endif %}
+    </div>
+    {% if dashboard.recent_activity %}
+    <ol class="activity-list">
+      {% for activity in dashboard.recent_activity %}
+      <li class="activity-item">
+        <span class="activity-dot" aria-hidden="true"></span>
+        <div class="activity-copy">
+          <strong>{{ activity.label }}</strong>
+          <p>{{ activity.detail }}</p>
+          <time datetime="{{ activity.occurred_at.isoformat() }}">{{ activity.occurred_at.strftime("%b %d, %Y %H:%M") }} UTC</time>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <div class="empty-activity">
+      <span class="empty-icon" aria-hidden="true">◷</span>
+      <h3>No activity yet</h3>
+      <p>Your assessment updates will appear here as you add work.</p>
+      <a href="{{ url_for('object_action.index') }}">Explore the assessment sections <span aria-hidden="true">→</span></a>
+    </div>
+    {% endif %}
+  </section>
+</div>
+
+<section class="quick-start">
+  <div><p class="eyebrow">QUICK NAVIGATION</p><h2>Continue building your portfolio</h2><p>Choose an assessment section to explore.</p></div>
+  <div class="quick-links">
+    <a class="quick-link" href="{{ url_for('object_action.index') }}">Object &amp; Action <span aria-hidden="true">→</span></a>
+    <a class="quick-link" href="{{ url_for('movement.index') }}">Movement Analysis <span aria-hidden="true">→</span></a>
+    <a class="quick-link" href="{{ url_for('quality.index') }}">Video Quality <span aria-hidden="true">→</span></a>
+    <a class="quick-link" href="{{ url_for('attention.index') }}">Attention to Detail <span aria-hidden="true">→</span></a>
+    <a class="quick-link" href="{{ url_for('report.preview') }}">Report Preview <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+{% endblock %}

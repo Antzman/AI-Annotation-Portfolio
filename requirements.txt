@@ -1,0 +1,7 @@
+# Runtime dependencies: free/open-source packages; no service/API credentials required.
+Flask>=3.1,<4
+Flask-SQLAlchemy>=3.1,<4
+reportlab>=4.4,<5
+
+# Test-only dependency.
+pytest>=8,<9

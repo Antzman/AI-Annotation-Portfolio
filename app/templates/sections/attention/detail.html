@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block page_title %}Attention to Detail · {{ exercise.title }}{% endblock %}
+{% block content %}
+<section class="page-heading detail-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('attention.index') }}">ATTENTION TO DETAIL</a> / ASSESSMENT</p>
+    <h1>{{ exercise.title }}</h1>
+    <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>
+  </div>
+  <a class="btn btn-outline-primary action-button" href="{{ url_for('attention.index') }}">All assessments</a>
+</section>
+
+<section class="review-state-card{% if review and review.reviewed_at %} review-state-complete{% endif %}" aria-label="Review status">
+  <div class="review-state-symbol" aria-hidden="true">{% if review and review.reviewed_at %}✓{% else %}◎{% endif %}</div>
+  <div class="review-state-copy">
+    <strong>{% if review and review.reviewed_at %}Review complete{% else %}Review not complete{% endif %}</strong>
+    <p>
+      {% if review and review.reviewed_at %}
+        Reviewed {{ review.reviewed_at.strftime("%b %d, %Y %H:%M") }} UTC. Adding, editing, or removing an issue resets this status.
+      {% elif issues %}
+        Review the {{ issues|length }} recorded issue{% if issues|length != 1 %}s{% endif %}, then mark this section complete.
+      {% else %}
+        No issues are recorded. After reviewing the clip, mark this section complete to confirm that no issues were found.
+      {% endif %}
+    </p>
+  </div>
+  <form method="post" action="{{ url_for('attention.mark_reviewed', exercise_id=exercise.id) }}">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <button class="btn {% if review and review.reviewed_at %}btn-light{% else %}btn-primary{% endif %} btn-sm" type="submit">
+      {% if review and review.reviewed_at %}Confirm review again{% else %}Mark as reviewed{% endif %}
+    </button>
+  </form>
+</section>
+
+<section class="panel observation-entry-panel" aria-labelledby="add-issue-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">POTENTIAL ISSUE</p><h2 id="add-issue-title">Record an observation</h2></div>
+    <span class="panel-tag">Manual review</span>
+  </div>
+  {% set form_action = url_for('attention.detail', exercise_id=exercise.id) %}
+  {% set submit_label = 'Add issue' %}
+  {% set cancel_url = none %}
+  {% set issue_categories = issue_labels %}
+  {% set severity_options = severity_labels %}
+  {% include "components/attention_issue_form.html" %}
+</section>
+
+<section class="observations-section" aria-labelledby="issues-title">
+  <div class="list-heading">
+    <div><p class="eyebrow">ASSESSMENT RECORD</p><h2 id="issues-title">Recorded issues</h2></div>
+    <span class="panel-tag">{{ issues|length }} entries</span>
+  </div>
+  {% if issues %}
+  <div class="observation-list">
+    {% for issue in issues %}
+    <article class="observation-card issue-card">
+      <div class="observation-time"><span aria-hidden="true">◷</span>{{ issue.timestamp }}</div>
+      <div class="observation-content">
+        <div class="issue-badges">
+          <span class="issue-category-badge">{{ issue_labels[issue.category] }}</span>
+          <span class="severity-badge severity-{{ issue.severity }}">{{ severity_labels[issue.severity] }} severity</span>
+        </div>
+        <h3>{{ issue.description }}</h3>
+        <p class="observation-action">{{ issue.explanation }}</p>
+        {% if issue.suggested_correction %}
+        <p class="movement-detail"><strong>Suggested correction:</strong> {{ issue.suggested_correction }}</p>
+        {% endif %}
+      </div>
+      <div class="observation-actions">
+        <a class="btn btn-light btn-sm" href="{{ url_for('attention.edit_issue', issue_id=issue.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('attention.delete_issue', issue_id=issue.id) }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="panel empty-assessments">
+    <span class="empty-icon" aria-hidden="true">◎</span>
+    <h3>No issues recorded</h3>
+    <p>If your review found no issues, use the review control above to record that outcome.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

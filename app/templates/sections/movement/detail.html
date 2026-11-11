@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block page_title %}Movement Analysis · {{ exercise.title }}{% endblock %}
+{% block content %}
+<section class="page-heading detail-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('movement.index') }}">MOVEMENT ANALYSIS</a> / ASSESSMENT</p>
+    <h1>{{ exercise.title }}</h1>
+    <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>
+  </div>
+  <a class="btn btn-outline-primary action-button" href="{{ url_for('movement.index') }}">All assessments</a>
+</section>
+
+<section class="panel observation-entry-panel" aria-labelledby="add-movement-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">MOVEMENT FINDINGS</p><h2 id="add-movement-title">Add a movement observation</h2></div>
+    <span class="panel-tag">Manual analysis</span>
+  </div>
+  {% set form_action = url_for('movement.detail', exercise_id=exercise.id) %}
+  {% set submit_label = 'Add observation' %}
+  {% set cancel_url = none %}
+  {% include "components/movement_observation_form.html" %}
+</section>
+
+<section class="observations-section" aria-labelledby="movement-observations-title">
+  <div class="list-heading">
+    <div><p class="eyebrow">ASSESSMENT RECORD</p><h2 id="movement-observations-title">Movement observations</h2></div>
+    <span class="panel-tag">{{ observations|length }} entries</span>
+  </div>
+  {% if observations %}
+  <div class="observation-list">
+    {% for observation in observations %}
+    <article class="observation-card movement-observation-card">
+      <div class="observation-time"><span aria-hidden="true">◷</span>{{ observation.timestamp }}</div>
+      <div class="observation-content">
+        <div class="movement-badges">
+          {% for value, label in visibility_options %}
+            {% if observation.visibility == value %}<span class="movement-badge visibility-badge">{{ label }}</span>{% endif %}
+          {% endfor %}
+          {% for value, label in plausibility_options %}
+            {% if observation.plausibility == value %}<span class="movement-badge plausibility-badge">{{ label }}</span>{% endif %}
+          {% endfor %}
+        </div>
+        <p class="observation-action">{{ observation.movement_description }}</p>
+        {% if observation.inconsistencies %}
+        <p class="movement-detail"><strong>Inconsistencies:</strong> {{ observation.inconsistencies }}</p>
+        {% endif %}
+        <p class="movement-detail"><strong>Reasoning:</strong> {{ observation.reasoning }}</p>
+      </div>
+      <div class="observation-actions">
+        <a class="btn btn-light btn-sm" href="{{ url_for('movement.edit_observation', observation_id=observation.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('movement.delete_observation', observation_id=observation.id) }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="panel empty-assessments">
+    <span class="empty-icon" aria-hidden="true">↗</span>
+    <h3>No movement observations yet</h3>
+    <p>Add a movement description and rate how visible and physically plausible it appears.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

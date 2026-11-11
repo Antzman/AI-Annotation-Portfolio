@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block page_title %}Report Preview{% endblock %}
+{% block content %}
+<section class="page-heading report-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / PORTFOLIO</p>
+    <h1>Report Preview</h1>
+    <p class="heading-copy">Review the content assembled from your saved portfolio before exporting a PDF.</p>
+  </div>
+  {% if report.has_assessments %}
+  <a class="btn btn-primary action-button" href="{{ url_for('report.download') }}" aria-label="Download PDF portfolio report">
+    <span aria-hidden="true">↓</span> Download PDF
+  </a>
+  {% else %}
+  <button class="btn btn-primary action-button" type="button" disabled aria-disabled="true">Download PDF</button>
+  {% endif %}
+</section>
+
+{% if download_error %}
+<div class="alert alert-warning" role="alert">{{ download_error }}</div>
+{% endif %}
+
+{% if report.is_complete %}
+<div class="report-status-banner report-status-complete">
+  <strong>Portfolio complete</strong>
+  <span>All four sections are complete across {{ report.total_assessments }} assessment{% if report.total_assessments != 1 %}s{% endif %}.</span>
+</div>
+{% elif report.has_assessments %}
+<div class="report-status-banner report-status-draft">
+  <strong>Draft report — incomplete sections are identified</strong>
+  <span>Completion: {{ report.completion }}%. Saved results are included; missing scores and observations are not invented.</span>
+</div>
+{% else %}
+<div class="report-status-banner report-status-draft">
+  <strong>No assessment data yet</strong>
+  <span>Create at least one assessment before exporting a report.</span>
+</div>
+{% endif %}
+
+<section class="report-summary-grid" aria-label="Report summary">
+  <article class="report-summary-card"><span>Generated</span><strong>{{ report.generated_at.strftime("%B %d, %Y") }}</strong></article>
+  <article class="report-summary-card"><span>Assessments</span><strong>{{ report.completed_assessments }} / {{ report.total_assessments }} complete</strong></article>
+  <article class="report-summary-card"><span>Portfolio progress</span><strong>{{ report.completion }}%</strong></article>
+  <article class="report-summary-card">
+    <span>Mean quality score</span>
+    <strong>{% if report.average_quality_score is not none %}{{ "%.1f"|format(report.average_quality_score) }} / 10{% else %}Not available{% endif %}</strong>
+  </article>
+</section>
+
+<section class="panel report-panel" aria-labelledby="report-cover-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">COVER PAGE</p><h2 id="report-cover-title">AI Annotation Portfolio Report</h2></div>
+    <span class="report-draft-label">{% if report.is_complete %}COMPLETE{% else %}DRAFT{% endif %}</span>
+  </div>
+  <dl class="report-facts">
+    <div><dt>Name</dt><dd>{% if report.profile and report.profile.name %}{{ report.profile.name }}{% else %}Not provided{% endif %}</dd></div>
+    <div><dt>Generated</dt><dd>{{ report.generated_at.strftime("%B %d, %Y %H:%M UTC") }}</dd></div>
+    <div><dt>Clip handling</dt><dd>Text references only; no video files are included or processed.</dd></div>
+  </dl>
+</section>
+
+<section class="panel report-panel" aria-labelledby="report-introduction-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">PERSONAL INTRODUCTION</p><h2 id="report-introduction-title">About the author</h2></div>
+    <a class="text-action" href="{{ url_for('profile.index') }}">Edit profile <span aria-hidden="true">→</span></a>
+  </div>
+  {% if report.profile and report.profile.introduction %}
+  <p class="report-copy">{{ report.profile.introduction }}</p>
+  {% else %}
+  <p class="report-empty-copy">No professional introduction provided. Add one in About to personalize the report.</p>
+  {% endif %}
+  <div class="report-profile-grid">
+    <div><h3>Relevant experience</h3><p>{{ report.profile.experience if report.profile and report.profile.experience else 'Not provided.' }}</p></div>
+    <div><h3>Technical interests</h3><p>{{ report.profile.technical_interests if report.profile and report.profile.technical_interests else 'Not provided.' }}</p></div>
+    <div><h3>Contact information</h3><p>{{ report.profile.contact_information if report.profile and report.profile.contact_information else 'Not provided.' }}</p></div>
+  </div>
+</section>
+
+<section class="panel report-panel" aria-labelledby="competencies-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">SKILLS AND COMPETENCIES</p><h2 id="competencies-title">Author-provided skills</h2></div>
+    <a class="text-action" href="{{ url_for('profile.index') }}">Edit skills <span aria-hidden="true">→</span></a>
+  </div>
+  {% if report.profile and report.profile.skills %}
+  <p class="report-copy">{{ report.profile.skills }}</p>
+  {% else %}
+  <p class="report-empty-copy">No personal skills have been provided.</p>
+  {% endif %}
+  <h3 class="report-subheading">Assessment evidence</h3>
+  <p class="report-empty-copy">Counts reflect saved work only; they are not an independent certification.</p>
+  <div class="table-responsive">
+    <table class="table table-bordered report-table">
+      <thead><tr><th scope="col">Competency area</th><th scope="col">Evidence in this portfolio</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Object &amp; Action Identification</th><td>{% set object_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set object_count.value = object_count.value + (exercise.object_action_observations|length) %}{% endfor %}{{ object_count.value }} saved observations</td></tr>
+        <tr><th scope="row">Movement Analysis</th><td>{% set movement_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set movement_count.value = movement_count.value + (exercise.movement_observations|length) %}{% endfor %}{{ movement_count.value }} saved observations</td></tr>
+        <tr><th scope="row">Video Quality Assessment</th><td>{% set quality_count = namespace(value=0) %}{% for exercise in report.exercises %}{% if exercise.quality_assessment and exercise.quality_assessment.overall_score is not none %}{% set quality_count.value = quality_count.value + 1 %}{% endif %}{% endfor %}{{ quality_count.value }} complete assessments{% if report.average_quality_score is not none %}; mean {{ "%.1f"|format(report.average_quality_score) }} / 10{% else %}; no overall score{% endif %}</td></tr>
+        <tr><th scope="row">Attention to Detail</th><td>{% set issue_count = namespace(value=0) %}{% set reviewed_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set issue_count.value = issue_count.value + (exercise.quality_issues|length) %}{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}{% set reviewed_count.value = reviewed_count.value + 1 %}{% endif %}{% endfor %}{{ issue_count.value }} issues; {{ reviewed_count.value }} assessments reviewed</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel report-panel" aria-labelledby="section-status-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">ASSESSMENT OVERVIEW</p><h2 id="section-status-title">Section completion</h2></div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-bordered report-table">
+      <thead><tr><th scope="col">Section</th><th scope="col">Status</th><th scope="col">Assessments complete</th></tr></thead>
+      <tbody>
+        {% for section in report.sections %}
+        <tr>
+          <th scope="row">{{ section.label }}</th>
+          <td><span class="status-badge status-{{ section.status }}">{% if section.status == 'complete' %}Complete{% elif section.status == 'in_progress' %}In progress{% else %}Not started{% endif %}</span></td>
+          <td>{{ section.complete_count }} / {{ section.total_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="report-results" aria-labelledby="report-results-title">
+  <div class="report-section-heading"><p class="eyebrow">DETAILED RESULTS</p><h2 id="report-results-title">Assessment results</h2></div>
+  {% if report.exercises %}
+    {% for exercise in report.exercises %}
+    <article class="panel report-assessment">
+      <div class="report-assessment-heading">
+        <div><p class="eyebrow">ASSESSMENT {{ loop.index }}</p><h3>{{ exercise.title }}</h3>
+          <p>{{ exercise.clip_reference or 'No clip reference provided' }}</p></div>
+        <span class="panel-tag">
+          {% if report.exercise_sections[exercise.id].object_action == 'complete' and report.exercise_sections[exercise.id].movement == 'complete' and report.exercise_sections[exercise.id].quality == 'complete' and report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Complete{% else %}Draft{% endif %}
+        </span>
+      </div>
+
+      <section class="report-result-section">
+        <div class="report-result-heading"><h4>Object &amp; Action Identification</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].object_action }}">{% if report.exercise_sections[exercise.id].object_action == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>
+        {% if exercise.object_action_observations %}
+        <div class="table-responsive"><table class="table table-bordered report-table">
+          <thead><tr><th scope="col">Timestamp</th><th scope="col">Object</th><th scope="col">Observed action and additional observations</th></tr></thead>
+          <tbody>{% for observation in exercise.object_action_observations %}
+            <tr><td>{{ observation.timestamp }}</td><td>{{ observation.identified_object }}</td><td>{{ observation.observed_action }}{% if observation.additional_observations %}<br><strong>Additional observations:</strong> {{ observation.additional_observations }}{% endif %}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+        {% else %}<p class="report-empty-copy">No object/action observations were recorded for this assessment.</p>{% endif %}
+      </section>
+
+      <section class="report-result-section">
+        <div class="report-result-heading"><h4>Movement Analysis</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].movement }}">{% if report.exercise_sections[exercise.id].movement == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>
+        {% if exercise.movement_observations %}
+        <div class="table-responsive"><table class="table table-bordered report-table">
+          <thead><tr><th scope="col">Timestamp</th><th scope="col">Movement, reasoning, and inconsistencies</th><th scope="col">Visibility</th><th scope="col">Plausibility</th></tr></thead>
+          <tbody>{% for observation in exercise.movement_observations %}
+            <tr><td>{{ observation.timestamp }}</td><td><strong>Description:</strong> {{ observation.movement_description }}<br><strong>Reasoning:</strong> {{ observation.reasoning }}{% if observation.inconsistencies %}<br><strong>Inconsistencies:</strong> {{ observation.inconsistencies }}{% endif %}</td><td>{{ observation.visibility.replace('_', ' ')|title }}</td><td>{{ observation.plausibility|title }}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+        {% else %}<p class="report-empty-copy">No movement observations were recorded for this assessment.</p>{% endif %}
+      </section>
+
+      <section class="report-result-section">
+        <div class="report-result-heading"><h4>Video Quality Assessment</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].quality }}">{% if report.exercise_sections[exercise.id].quality == 'complete' %}Complete{% elif report.exercise_sections[exercise.id].quality == 'in_progress' %}In progress{% else %}Not started{% endif %}</span></div>
+        {% if exercise.quality_assessment and exercise.quality_assessment.overall_score is not none %}
+        <p class="report-score-line">Overall score: <strong>{{ "%.1f"|format(exercise.quality_assessment.overall_score) }} / 10</strong> (mean of five category ratings)</p>
+        {% elif exercise.quality_assessment and exercise.quality_assessment.ratings %}
+        <p class="report-empty-copy">Incomplete: {{ exercise.quality_assessment.ratings|length }} of 5 category ratings saved. No overall score is reported.</p>
+        {% else %}
+        <p class="report-empty-copy">No quality ratings were saved. No overall score is reported.</p>
+        {% endif %}
+        {% if exercise.quality_assessment and exercise.quality_assessment.ratings %}
+        <div class="table-responsive"><table class="table table-bordered report-table">
+          <thead><tr><th scope="col">Category</th><th scope="col">Score</th><th scope="col">Explanation</th></tr></thead>
+          <tbody>{% for rating in exercise.quality_assessment.ratings|sort(attribute='category') %}
+            <tr><th scope="row">{{ rating.category.replace('_', ' ')|title }}</th><td>{{ rating.score }} / 10</td><td>{{ rating.explanation }}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+        {% endif %}
+      </section>
+
+      <section class="report-result-section">
+        <div class="report-result-heading"><h4>Attention to Detail</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].attention_to_detail }}">{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Reviewed{% elif report.exercise_sections[exercise.id].attention_to_detail == 'in_progress' %}Review needed{% else %}Not started{% endif %}</span></div>
+        {% set reviewed = report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}
+        {% if exercise.quality_issues %}
+        {% if not reviewed %}<p class="report-empty-copy">Review not marked complete. Saved findings are shown below.</p>{% endif %}
+        <div class="table-responsive"><table class="table table-bordered report-table">
+          <thead><tr><th scope="col">Timestamp</th><th scope="col">Category</th><th scope="col">Severity</th><th scope="col">Issue, explanation, and suggested correction</th></tr></thead>
+          <tbody>{% for issue in exercise.quality_issues %}
+            <tr><td>{{ issue.timestamp }}</td><td>{{ issue.category.replace('_', ' ')|title }}</td><td>{{ issue.severity|title }}</td><td><strong>Issue:</strong> {{ issue.description }}<br><strong>Explanation:</strong> {{ issue.explanation }}{% if issue.suggested_correction %}<br><strong>Suggested correction:</strong> {{ issue.suggested_correction }}{% endif %}</td></tr>
+          {% endfor %}</tbody>
+        </table></div>
+        {% elif reviewed %}
+        <p class="report-copy">Reviewed; no issues were recorded.</p>
+        {% else %}
+        <p class="report-empty-copy">No issues are recorded, and this section has not been marked reviewed.</p>
+        {% endif %}
+      </section>
+    </article>
+    {% endfor %}
+  {% else %}
+  <div class="panel empty-assessments">
+    <span class="empty-icon" aria-hidden="true">▤</span>
+    <h3>No assessment results yet</h3>
+    <p>Assessment sections will appear here after you save manual observations.</p>
+  </div>
+  {% endif %}
+</section>
+
+<section class="panel report-conclusion" aria-labelledby="conclusion-title">
+  <p class="eyebrow">FINAL SUMMARY</p>
+  <h2 id="conclusion-title">Overall conclusion</h2>
+  {% if report.is_complete %}
+  <p>All four assessment sections are complete for {{ report.total_assessments }} assessment{% if report.total_assessments != 1 %}s{% endif %}. This report presents manually entered observations and ratings; video files were not included or independently analyzed.</p>
+  {% elif report.has_assessments %}
+  <p>This draft is incomplete. Pending sections across one or more assessments:
+    {% for section in report.sections if section.status != 'complete' %}{{ section.label }}{% if not loop.last %}; {% endif %}{% endfor %}.
+    Incomplete results are labeled, and no overall quality score is reported until all five category ratings are saved.
+  </p>
+  {% else %}
+  <p>No assessment results are available. Create an assessment and record your observations before presenting a portfolio.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+<form method="post" action="{{ form_action }}" class="observation-form">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  {% if errors %}
+  <div class="alert alert-danger form-errors" role="alert">
+    <p>Please correct the following:</p>
+    <ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label" for="movement-timestamp">Timestamp <span class="required-mark">*</span></label>
+      <input class="form-control" id="movement-timestamp" name="timestamp" value="{{ values.timestamp }}"
+             placeholder="00:00-00:03" maxlength="80" required>
+      <div class="form-text">MM:SS or HH:MM:SS; optional range.</div>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="visibility">Movement visibility <span class="required-mark">*</span></label>
+      <select class="form-select" id="visibility" name="visibility" required>
+        <option value="">Select visibility</option>
+        {% for value, label in visibility_options %}
+        <option value="{{ value }}" {% if values.visibility == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label" for="plausibility">Physical plausibility <span class="required-mark">*</span></label>
+      <select class="form-select" id="plausibility" name="plausibility" required>
+        <option value="">Select plausibility</option>
+        {% for value, label in plausibility_options %}
+        <option value="{{ value }}" {% if values.plausibility == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="movement-description">Movement description <span class="required-mark">*</span></label>
+      <textarea class="form-control" id="movement-description" name="movement_description"
+                rows="3" maxlength="4000" required>{{ values.movement_description }}</textarea>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="inconsistencies">Observed inconsistencies <span class="optional-mark">Optional</span></label>
+      <textarea class="form-control" id="inconsistencies" name="inconsistencies"
+                rows="2" maxlength="4000">{{ values.inconsistencies }}</textarea>
+    </div>
+    <div class="col-12">
+      <label class="form-label" for="reasoning">Explanation and reasoning <span class="required-mark">*</span></label>
+      <textarea class="form-control" id="reasoning" name="reasoning" rows="3"
+                maxlength="4000" required>{{ values.reasoning }}</textarea>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">{{ submit_label }}</button>
+    {% if cancel_url %}<a class="btn btn-light" href="{{ cancel_url }}">Cancel</a>{% endif %}
+  </div>
+</form>

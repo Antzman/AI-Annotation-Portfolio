@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block page_title %}{{ exercise.title }}{% endblock %}
+{% block content %}
+<section class="page-heading detail-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('object_action.index') }}">OBJECT &amp; ACTION</a> / ASSESSMENT</p>
+    <h1>{{ exercise.title }}</h1>
+    <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>
+  </div>
+  <a class="btn btn-outline-primary action-button" href="{{ url_for('object_action.index') }}">All assessments</a>
+</section>
+
+<section class="panel observation-entry-panel" aria-labelledby="add-observation-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">TIMESTAMPED FINDINGS</p><h2 id="add-observation-title">Add an observation</h2></div>
+    <span class="panel-tag">Manual entry</span>
+  </div>
+  {% set form_action = url_for('object_action.detail', exercise_id=exercise.id) %}
+  {% set submit_label = 'Add observation' %}
+  {% set cancel_url = none %}
+  {% include "components/object_action_observation_form.html" %}
+</section>
+
+<section class="observations-section" aria-labelledby="observations-title">
+  <div class="list-heading">
+    <div><p class="eyebrow">ASSESSMENT RECORD</p><h2 id="observations-title">Observations</h2></div>
+    <span class="panel-tag">{{ observations|length }} entries</span>
+  </div>
+  {% if observations %}
+  <div class="observation-list">
+    {% for observation in observations %}
+    <article class="observation-card">
+      <div class="observation-time"><span aria-hidden="true">◷</span>{{ observation.timestamp }}</div>
+      <div class="observation-content">
+        <h3>{{ observation.identified_object }}</h3>
+        <p class="observation-action">{{ observation.observed_action }}</p>
+        {% if observation.additional_observations %}
+        <p class="observation-extra">{{ observation.additional_observations }}</p>
+        {% endif %}
+      </div>
+      <div class="observation-actions">
+        <a class="btn btn-light btn-sm" href="{{ url_for('object_action.edit_observation', observation_id=observation.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('object_action.delete_observation', observation_id=observation.id) }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="panel empty-assessments">
+    <span class="empty-icon" aria-hidden="true">◷</span>
+    <h3>No observations added</h3>
+    <p>Use the form above to record what is visible in the referenced clip.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

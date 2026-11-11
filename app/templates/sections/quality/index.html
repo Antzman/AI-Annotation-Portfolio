@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block page_title %}Video Quality Assessment{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>
+    <h1>Video Quality Assessment</h1>
+    <p class="heading-copy">Rate five quality categories and explain each score based on your independent review.</p>
+  </div>
+</section>
+
+<section class="assessments-section quality-assessments" aria-labelledby="quality-assessments-title">
+  <div class="list-heading">
+    <div><p class="eyebrow">YOUR WORK</p><h2 id="quality-assessments-title">Choose an assessment</h2></div>
+    <span class="panel-tag">{{ exercises|length }} total</span>
+  </div>
+  {% if exercises %}
+  <div class="assessment-list">
+    {% for exercise in exercises %}
+    {% set assessment = exercise.quality_assessment %}
+    {% set score = assessment.overall_score if assessment else none %}
+    <article class="assessment-card">
+      <span class="assessment-card-icon quality-card-icon" aria-hidden="true">◫</span>
+      <div class="assessment-card-body">
+        <h3><a href="{{ url_for('quality.detail', exercise_id=exercise.id) }}">{{ exercise.title }}</a></h3>
+        <p>{{ exercise.clip_reference or 'No clip reference added' }}</p>
+      </div>
+      {% if score is not none %}
+      <span class="quality-status quality-complete">{{ "%.1f"|format(score) }} / 10</span>
+      {% elif assessment and assessment.ratings %}
+      <span class="quality-status quality-incomplete">{{ assessment.ratings|length }} / 5 categories</span>
+      {% else %}
+      <span class="quality-status quality-incomplete">Not started</span>
+      {% endif %}
+      <a class="btn btn-outline-primary btn-sm" href="{{ url_for('quality.detail', exercise_id=exercise.id) }}">
+        {% if assessment and assessment.ratings %}Edit ratings{% else %}Start assessment{% endif %}
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="panel empty-assessments">
+    <span class="empty-icon" aria-hidden="true">◫</span>
+    <h3>No assessments available</h3>
+    <p>Create an assessment in Object &amp; Action Identification before rating its footage quality.</p>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
