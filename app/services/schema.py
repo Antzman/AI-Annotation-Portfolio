@@ -45,3 +45,18 @@ def migrate_quality_issue_timestamps(engine):
                 "BEGIN SELECT RAISE(ABORT, 'quality issue timestamp is required'); END"
             )
         )
+
+
+def migrate_exercise_finalization(engine):
+    inspector = inspect(engine)
+    if "exercises" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("exercises")}
+    if "finalized_at" in columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text("ALTER TABLE exercises ADD COLUMN finalized_at DATETIME")
+        )

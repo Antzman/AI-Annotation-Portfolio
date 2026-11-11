@@ -6,6 +6,7 @@ from sqlalchemy.orm import selectinload
 from app.extensions import db
 from app.models import Exercise, QualityAssessment, QualityRating
 from app.models.quality import QUALITY_CATEGORIES
+from app.services.assessment_workflow import assessment_sections
 from app.services.quality_validation import QUALITY_LABELS, validate_quality_form
 from app.services.web import database_failure
 
@@ -55,6 +56,7 @@ def detail(exercise_id):
     if request.method == "POST":
         values, errors = validate_quality_form(request.form)
         if not errors:
+            exercise.finalized_at = None
             if assessment is None:
                 assessment = QualityAssessment(exercise=exercise)
                 db.session.add(assessment)
@@ -97,6 +99,8 @@ def detail(exercise_id):
             "sections/quality/detail.html",
             active_nav="video-quality",
             exercise=exercise,
+            workflow_sections=assessment_sections(exercise),
+            current_section="quality",
             assessment=assessment,
             values=values,
             errors=errors,

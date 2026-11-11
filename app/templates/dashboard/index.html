@@ -20,17 +20,17 @@
          aria-valuenow="{{ dashboard.completion }}" aria-valuemin="0" aria-valuemax="100">
       <div class="progress-bar" style="width: {{ dashboard.completion }}%"></div>
     </div>
-    <p class="metric-caption">{{ dashboard.completed_assessments }} of {{ dashboard.total_assessments }} assessments complete</p>
+    <p class="metric-caption">Saved section progress across {{ dashboard.total_assessments }} started assessments</p>
   </article>
   <article class="summary-card">
     <div class="summary-topline"><span>Completed Assessments</span><span class="metric-icon green-icon" aria-hidden="true">✓</span></div>
     <div class="metric-value">{{ dashboard.completed_assessments }}</div>
-    <p class="metric-caption">of {{ dashboard.total_assessments }} started</p>
+    <p class="metric-caption">of {{ dashboard.started_assessments }} started assessments</p>
   </article>
   <article class="summary-card">
     <div class="summary-topline"><span>Active Assessments</span><span class="metric-icon amber-icon" aria-hidden="true">◷</span></div>
     <div class="metric-value">{{ dashboard.in_progress_assessments }}</div>
-    <p class="metric-caption">with at least one section underway</p>
+    <p class="metric-caption">awaiting final review or finalisation</p>
   </article>
 </section>
 

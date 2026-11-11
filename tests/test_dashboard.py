@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from app.models import (
     Exercise,
     MovementObservation,
@@ -11,7 +13,7 @@ from app.services.dashboard import get_dashboard_data
 
 
 def _complete_exercise(session, title):
-    exercise = Exercise(title=title)
+    exercise = Exercise(title=title, finalized_at=datetime.now(UTC))
     exercise.object_action_observations.append(
         ObjectActionObservation(
             timestamp="00:00-00:03",
@@ -65,7 +67,7 @@ def test_dashboard_empty_database_shows_zero_completion_and_not_started(app):
     assert b"Annotation Quality Review" in response.data
     assert b"Demonstration workspace" in response.data
     assert b"data may reset periodically" in response.data
-    assert b"0 of 0 assessments complete" in response.data
+    assert b"Saved section progress across 0 started assessments" in response.data
     assert response.data.count(b"Not started") == 4
     assert b"No activity yet" in response.data
 

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block page_title %}Final Review · {{ exercise.title }}{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('assessment.overview', exercise_id=exercise.id) }}">ASSESSMENT OVERVIEW</a> / FINAL REVIEW</p>
+    <h1>Final Review</h1>
+    <p class="heading-copy">{{ exercise.title }}{% if exercise.clip_reference %} · {{ exercise.clip_reference }}{% endif %}</p>
+  </div>
+  {% if exercise.finalized_at %}<span class="status-badge status-complete">Finalised</span>{% else %}<span class="status-badge status-in_progress">Draft</span>{% endif %}
+</section>
+
+{% include "components/assessment_nav.html" with context %}
+
+{% if missing_sections %}
+<div class="alert alert-warning" role="status">
+  <strong>More work is required before finalising.</strong>
+  <p class="mb-1">Complete the following sections:</p>
+  <ul class="mb-0">{% for section in missing_sections %}<li>{{ section }}</li>{% endfor %}</ul>
+</div>
+{% elif exercise.finalized_at %}
+<div class="report-status-banner report-status-complete">
+  <strong>Assessment finalised</strong>
+  <span>Your PDF is generated from the latest saved assessment data.</span>
+</div>
+{% else %}
+<div class="report-status-banner report-status-complete">
+  <strong>All required sections are complete</strong>
+  <span>Review the saved content below, then finalise to make the assessment report available.</span>
+</div>
+{% endif %}
+
+<section class="panel workflow-panel" aria-labelledby="review-status-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">SECTION STATUS</p><h2 id="review-status-title">Completion overview</h2></div>
+  </div>
+  <div class="workflow-section-list">
+    {% for section in sections %}
+    <div class="workflow-section-row">
+      <h3>{{ section.label }}</h3>
+      <span class="status-badge status-{{ section.status }}">
+        {% if section.status == 'complete' %}Completed{% elif section.status == 'in_progress' %}In Progress{% else %}Not Started{% endif %}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel review-content-panel" aria-labelledby="object-review-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">SECTION 1</p><h2 id="object-review-title">Object &amp; Action Annotation</h2></div>
+    <a class="text-action" href="{{ url_for('object_action.detail', exercise_id=exercise.id) }}">Open section →</a>
+  </div>
+  {% if exercise.object_action_observations %}
+  <div class="table-responsive"><table class="table table-bordered report-table">
+    <thead><tr><th>Timestamp</th><th>Object</th><th>Observed action</th><th>Additional observations</th></tr></thead>
+    <tbody>{% for observation in exercise.object_action_observations %}
+      <tr><td>{{ observation.timestamp }}</td><td>{{ observation.identified_object }}</td><td>{{ observation.observed_action }}</td><td>{{ observation.additional_observations or '—' }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="report-empty-copy">No object and action observations have been saved.</p>{% endif %}
+</section>
+
+<section class="panel review-content-panel" aria-labelledby="movement-review-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">SECTION 2</p><h2 id="movement-review-title">Movement &amp; Motion Analysis</h2></div>
+    <a class="text-action" href="{{ url_for('movement.detail', exercise_id=exercise.id) }}">Open section →</a>
+  </div>
+  {% if exercise.movement_observations %}
+  <div class="table-responsive"><table class="table table-bordered report-table">
+    <thead><tr><th>Timestamp</th><th>Movement</th><th>Visibility</th><th>Plausibility</th><th>Reasoning and inconsistencies</th></tr></thead>
+    <tbody>{% for observation in exercise.movement_observations %}
+      <tr><td>{{ observation.timestamp }}</td><td>{{ observation.movement_description }}</td><td>{{ observation.visibility.replace('_', ' ')|title }}</td><td>{{ observation.plausibility|title }}</td><td>{{ observation.reasoning }}{% if observation.inconsistencies %}<br><strong>Inconsistencies:</strong> {{ observation.inconsistencies }}{% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="report-empty-copy">No movement observations have been saved.</p>{% endif %}
+</section>
+
+<section class="panel review-content-panel" aria-labelledby="quality-review-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">SECTION 3</p><h2 id="quality-review-title">Video Quality Assessment</h2></div>
+    <a class="text-action" href="{{ url_for('quality.detail', exercise_id=exercise.id) }}">Open section →</a>
+  </div>
+  {% if exercise.quality_assessment and exercise.quality_assessment.ratings %}
+  <div class="table-responsive"><table class="table table-bordered report-table">
+    <thead><tr><th>Category</th><th>Score</th><th>Explanation</th></tr></thead>
+    <tbody>{% for rating in exercise.quality_assessment.ratings|sort(attribute='category') %}
+      <tr><td>{{ rating.category.replace('_', ' ')|title }}</td><td>{{ rating.score }} / 10</td><td>{{ rating.explanation }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="report-empty-copy">No quality ratings have been saved.</p>{% endif %}
+  {% if exercise.quality_assessment and exercise.quality_assessment.overall_score is not none %}
+  <p class="report-score-line mt-2">Overall score: <strong>{{ "%.1f"|format(exercise.quality_assessment.overall_score) }} / 10</strong></p>
+  {% endif %}
+</section>
+
+<section class="panel review-content-panel" aria-labelledby="annotation-review-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">SECTION 4</p><h2 id="annotation-review-title">Annotation Quality Review</h2></div>
+    <a class="text-action" href="{{ url_for('attention.detail', exercise_id=exercise.id) }}">Open section →</a>
+  </div>
+  {% if exercise.quality_issues %}
+  <div class="table-responsive"><table class="table table-bordered report-table">
+    <thead><tr><th>Timestamp</th><th>Issue</th><th>Severity</th><th>Explanation</th><th>Suggested correction</th></tr></thead>
+    <tbody>{% for issue in exercise.quality_issues %}
+      <tr><td>{{ issue.timestamp }}</td><td>{{ issue.description }}<br>{{ issue.category.replace('_', ' ')|title }}</td><td>{{ issue.severity|title }}</td><td>{{ issue.explanation }}</td><td>{{ issue.suggested_correction or '—' }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% elif sections[3].status == 'complete' %}
+  <p class="report-copy">Review completed; no issues were recorded.</p>
+  {% else %}<p class="report-empty-copy">No issues have been saved and the section has not been marked reviewed.</p>{% endif %}
+</section>
+
+<section class="panel workflow-actions" aria-label="Finalise assessment">
+  <div>
+    <h2>Submit &amp; Finalise Assessment</h2>
+    <p>Finalisation is within this workspace only. Nothing is submitted to an employer. You can reopen this assessment later for corrections.</p>
+  </div>
+  <div class="workflow-action-buttons">
+    <a class="btn btn-outline-primary" href="{{ url_for('assessment.overview', exercise_id=exercise.id) }}">Assessment overview</a>
+    {% if exercise.finalized_at %}
+    <a class="btn btn-primary" href="{{ url_for('assessment.download_report', exercise_id=exercise.id) }}">Download assessment PDF</a>
+    {% elif not missing_sections %}
+    <form method="post" action="{{ url_for('assessment.finalize', exercise_id=exercise.id) }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-primary" type="submit">Submit &amp; Finalise Assessment</button>
+    </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

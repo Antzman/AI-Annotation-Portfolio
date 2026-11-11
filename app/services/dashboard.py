@@ -133,18 +133,30 @@ def get_dashboard_data():
     completion = (
         int(completed_checks * 100 / total_checks + 0.5) if total_checks else 0
     )
-    assessment_checks = [
-        [checks[key][index] for key, _label in SECTION_LABELS]
-        for index in range(len(exercises))
-    ]
-    completed_assessments = sum(all(values) for values in assessment_checks)
-    in_progress_assessments = sum(any(values) and not all(values) for values in assessment_checks)
+    completed_assessments = sum(
+        exercise.finalized_at is not None for exercise in exercises
+    )
+    in_progress_assessments = len(exercises) - completed_assessments
 
     activities = []
     activities.extend(
         _activity_rows(
             Exercise, "Assessment created", lambda row: row.title, Exercise.created_at
         )
+    )
+    finalized_exercises = db.session.execute(
+        select(Exercise)
+        .where(Exercise.finalized_at.is_not(None))
+        .order_by(Exercise.finalized_at.desc())
+        .limit(8)
+    ).scalars()
+    activities.extend(
+        Activity(
+            occurred_at=exercise.finalized_at,
+            label="Assessment finalised",
+            detail=exercise.title,
+        )
+        for exercise in finalized_exercises
     )
     activities.extend(
         _activity_rows(
@@ -193,6 +205,7 @@ def get_dashboard_data():
         "completed_assessments": completed_assessments,
         "in_progress_assessments": in_progress_assessments,
         "total_assessments": len(exercises),
+        "started_assessments": len(exercises),
         "sections": sections,
         "recent_activity": activities[:8],
     }

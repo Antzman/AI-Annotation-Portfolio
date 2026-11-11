@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block page_title %}{{ exercise.title }} · Assessment Overview{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENT</p>
+    <h1>{{ exercise.title }}</h1>
+    <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>
+  </div>
+  {% if exercise.finalized_at %}
+  <span class="status-badge status-complete">Finalised</span>
+  {% else %}
+  <span class="status-badge status-in_progress">In Progress</span>
+  {% endif %}
+</section>
+
+{% include "components/assessment_nav.html" with context %}
+
+<section class="summary-grid assessment-summary-grid" aria-label="Assessment progress">
+  <article class="summary-card completion-card">
+    <div class="summary-topline"><span>Assessment Progress</span></div>
+    <div class="metric-value">{{ completion }}<span class="metric-unit">%</span></div>
+    <div class="progress completion-progress" role="progressbar" aria-label="Assessment progress"
+         aria-valuenow="{{ completion }}" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar" style="width: {{ completion }}%"></div>
+    </div>
+    <p class="metric-caption">{{ sections|selectattr('status', 'equalto', 'complete')|list|length }} of 4 sections complete</p>
+  </article>
+  <article class="summary-card">
+    <div class="summary-topline"><span>Assessment status</span></div>
+    <div class="metric-value metric-status">
+      {% if exercise.finalized_at %}Finalised{% elif completion == 100 %}Ready{% else %}In progress{% endif %}
+    </div>
+    <p class="metric-caption">
+      {% if exercise.finalized_at %}Completed {{ exercise.finalized_at.strftime("%b %d, %Y %H:%M UTC") }}.
+      {% elif completion == 100 %}All required sections are complete.
+      {% else %}Saved work remains available in each section.{% endif %}
+    </p>
+  </article>
+</section>
+
+<section class="panel workflow-panel" aria-labelledby="workflow-sections-title">
+  <div class="panel-heading">
+    <div><p class="eyebrow">ANNOTATION ASSESSMENT WORKFLOW</p><h2 id="workflow-sections-title">Assessment sections</h2></div>
+    <span class="panel-tag">{{ sections|length }} sections</span>
+  </div>
+  <div class="workflow-section-list">
+    {% for section in sections %}
+      {% if section.key == 'object_action' %}
+        {% set section_url = url_for('object_action.detail', exercise_id=exercise.id) %}
+      {% elif section.key == 'movement' %}
+        {% set section_url = url_for('movement.detail', exercise_id=exercise.id) %}
+      {% elif section.key == 'quality' %}
+        {% set section_url = url_for('quality.detail', exercise_id=exercise.id) %}
+      {% else %}
+        {% set section_url = url_for('attention.detail', exercise_id=exercise.id) %}
+      {% endif %}
+    <article class="workflow-section-row">
+      <div>
+        <h3>{{ section.label }}</h3>
+        <span class="status-badge status-{{ section.status }}">
+          {% if section.status == 'complete' %}Completed{% elif section.status == 'in_progress' %}In Progress{% else %}Not Started{% endif %}
+        </span>
+      </div>
+      <a class="btn btn-outline-primary btn-sm" href="{{ section_url }}">Open section</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel workflow-actions" aria-label="Assessment actions">
+  <div>
+    <h2>Final review</h2>
+    <p>Review saved observations, ratings and findings before finalising this assessment.</p>
+  </div>
+  <div class="workflow-action-buttons">
+    <a class="btn btn-outline-primary" href="{{ url_for('assessment.review', exercise_id=exercise.id) }}">Open final review</a>
+    {% if exercise.finalized_at %}
+    <a class="btn btn-primary" href="{{ url_for('assessment.download_report', exercise_id=exercise.id) }}">Download assessment PDF</a>
+    <form method="post" action="{{ url_for('assessment.reopen', exercise_id=exercise.id) }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-light" type="submit">Reopen for corrections</button>
+    </form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

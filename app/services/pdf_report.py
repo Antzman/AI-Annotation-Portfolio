@@ -269,7 +269,12 @@ def _quality_values(exercise):
 def _cover(story, report, styles):
     profile = report["profile"]
     display_name = profile.name if profile and profile.name else "Name not provided"
-    status = "COMPLETE" if report["is_complete"] else "DRAFT - INCOMPLETE"
+    if report["is_finalized"]:
+        status = "FINALISED"
+    elif report["is_complete"]:
+        status = "READY TO FINALISE"
+    else:
+        status = "DRAFT - INCOMPLETE"
     story.extend(
         [
             Spacer(1, 1.15 * inch),
@@ -281,7 +286,15 @@ def _cover(story, report, styles):
             ),
         ]
     )
-    rows = [
+    rows = []
+    if len(report["exercises"]) == 1:
+        rows.append(
+            [
+                _paragraph("ASSESSMENT", styles["cover-label"]),
+                _paragraph(report["exercises"][0].title, styles["cover-value"]),
+            ]
+        )
+    rows.extend([
         [
             _paragraph("PREPARED FOR", styles["cover-label"]),
             _paragraph(display_name, styles["cover-value"]),
@@ -308,7 +321,7 @@ def _cover(story, report, styles):
             _paragraph("ASSESSMENT PROGRESS", styles["cover-label"]),
             _paragraph(f'{report["completion"]}%', styles["cover-value"]),
         ],
-    ]
+    ])
     facts = Table(rows, colWidths=[1.65 * inch, CONTENT_WIDTH - 1.65 * inch])
     facts.setStyle(
         TableStyle(
@@ -711,7 +724,11 @@ def generate_pdf(report):
         rightMargin=PAGE_MARGIN,
         topMargin=0.68 * inch,
         bottomMargin=0.72 * inch,
-        title="AI Annotation Studio Assessment Report",
+        title=(
+            f"AI Annotation Studio Assessment Report: {report['exercises'][0].title}"
+            if len(report["exercises"]) == 1
+            else "AI Annotation Studio Assessment Report"
+        ),
         author=display_name,
     )
     styles = _styles()

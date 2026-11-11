@@ -10,6 +10,8 @@
   <a class="btn btn-outline-primary action-button" href="{{ url_for('attention.index') }}">All assessments</a>
 </section>
 
+{% include "components/assessment_nav.html" %}
+
 <section class="review-state-card{% if review and review.reviewed_at %} review-state-complete{% endif %}" aria-label="Review status">
   <div class="review-state-symbol" aria-hidden="true">{% if review and review.reviewed_at %}✓{% else %}◎{% endif %}</div>
   <div class="review-state-copy">

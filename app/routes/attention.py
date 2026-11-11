@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.extensions import db
 from app.models import Exercise, QualityIssue, SectionReview
+from app.services.assessment_workflow import assessment_sections
 from app.services.attention_validation import (
     ISSUE_LABELS,
     SEVERITY_LABELS,
@@ -76,6 +77,7 @@ def detail(exercise_id):
     if request.method == "POST":
         values, errors = validate_issue_form(request.form)
         if not errors:
+            exercise.finalized_at = None
             issue = QualityIssue(
                 exercise=exercise,
                 timestamp=values["timestamp"],
@@ -105,6 +107,8 @@ def detail(exercise_id):
             "sections/attention/detail.html",
             active_nav="attention-to-detail",
             exercise=exercise,
+            workflow_sections=assessment_sections(exercise),
+            current_section="attention_to_detail",
             issues=_render_issues(exercise),
             review=_review_for(exercise),
             values=values,
@@ -132,6 +136,7 @@ def edit_issue(issue_id):
     if request.method == "POST":
         values, errors = validate_issue_form(request.form)
         if not errors:
+            exercise.finalized_at = None
             issue.timestamp = values["timestamp"]
             issue.category = values["category"]
             issue.description = values["description"]
@@ -157,6 +162,8 @@ def edit_issue(issue_id):
             "sections/attention/edit_issue.html",
             active_nav="attention-to-detail",
             exercise=exercise,
+            workflow_sections=assessment_sections(exercise),
+            current_section="attention_to_detail",
             issue=issue,
             values=values,
             errors=errors,
@@ -172,6 +179,7 @@ def delete_issue(issue_id):
     issue = db.get_or_404(QualityIssue, issue_id)
     exercise = issue.exercise
     exercise_id = exercise.id
+    exercise.finalized_at = None
     _clear_review(exercise)
     db.session.delete(issue)
     try:
@@ -191,6 +199,7 @@ def delete_issue(issue_id):
 @bp.post("/<int:exercise_id>/mark-reviewed")
 def mark_reviewed(exercise_id):
     exercise = db.get_or_404(Exercise, exercise_id)
+    exercise.finalized_at = None
     review = _review_for(exercise)
     if review is None:
         review = SectionReview(

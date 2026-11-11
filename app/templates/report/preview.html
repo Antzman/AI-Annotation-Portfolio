@@ -20,10 +20,14 @@
 <div class="alert alert-warning" role="alert">{{ download_error }}</div>
 {% endif %}
 
-{% if report.is_complete %}
+{% if report.is_finalized %}
 <div class="report-status-banner report-status-complete">
-  <strong>Assessments complete</strong>
-  <span>All four sections are complete across {{ report.total_assessments }} assessment{% if report.total_assessments != 1 %}s{% endif %}.</span>
+  <strong>Assessments finalised</strong>
+  <span>{{ report.finalized_assessments }} assessment{% if report.finalized_assessments != 1 %}s are{% else %} is{% endif %} finalised and available for PDF export.</span>
+{% elif report.is_complete %}
+<div class="report-status-banner report-status-complete">
+  <strong>All required sections are complete</strong>
+  <span>Review and finalise each assessment to complete the workflow.</span>
 </div>
 {% elif report.has_assessments %}
 <div class="report-status-banner report-status-draft">
@@ -130,9 +134,10 @@
         <div><p class="eyebrow">ASSESSMENT {{ loop.index }}</p><h3>{{ exercise.title }}</h3>
           <p>{{ exercise.clip_reference or 'No clip reference provided' }}</p></div>
         <span class="panel-tag">
-          {% if report.exercise_sections[exercise.id].object_action == 'complete' and report.exercise_sections[exercise.id].movement == 'complete' and report.exercise_sections[exercise.id].quality == 'complete' and report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Complete{% else %}Draft{% endif %}
+          {% if exercise.finalized_at %}Finalised{% elif report.exercise_sections[exercise.id].object_action == 'complete' and report.exercise_sections[exercise.id].movement == 'complete' and report.exercise_sections[exercise.id].quality == 'complete' and report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Ready to finalise{% else %}Draft{% endif %}
         </span>
       </div>
+      <a class="text-action" href="{{ url_for('assessment.overview', exercise_id=exercise.id) }}">Open assessment overview →</a>
 
       <section class="report-result-section">
         <div class="report-result-heading"><h4>Object &amp; Action Annotation</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].object_action }}">{% if report.exercise_sections[exercise.id].object_action == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>

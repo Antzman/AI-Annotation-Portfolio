@@ -10,6 +10,7 @@ from sqlalchemy.engine import Engine
 from app.config import Config
 from app.extensions import db
 from app.services.schema import (
+    migrate_exercise_finalization,
     migrate_legacy_section_reviews,
     migrate_quality_issue_timestamps,
 )
@@ -60,10 +61,12 @@ def create_app(test_config=None):
         migrate_legacy_section_reviews(db.engine)
         db.create_all()
         migrate_quality_issue_timestamps(db.engine)
+        migrate_exercise_finalization(db.engine)
         ensure_default_profile()
 
     from app.routes import dashboard
     from app.routes import attention
+    from app.routes import assessment
     from app.routes import movement
     from app.routes import object_action
     from app.routes import profile
@@ -72,6 +75,7 @@ def create_app(test_config=None):
 
     app.register_blueprint(dashboard.bp)
     app.register_blueprint(attention.bp)
+    app.register_blueprint(assessment.bp)
     app.register_blueprint(movement.bp)
     app.register_blueprint(object_action.bp)
     app.register_blueprint(profile.bp)

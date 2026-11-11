@@ -1,4 +1,6 @@
-from sqlalchemy import CheckConstraint, String, Text
+from datetime import datetime
+
+from sqlalchemy import CheckConstraint, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.extensions import db
@@ -14,6 +16,9 @@ class Exercise(TimestampMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(160), nullable=False)
     clip_reference: Mapped[str | None] = mapped_column(String(300))
+    finalized_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     object_action_observations: Mapped[list["ObjectActionObservation"]] = relationship(
         back_populates="exercise", cascade="all, delete-orphan", passive_deletes=True

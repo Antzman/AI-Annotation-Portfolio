@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.extensions import db
 from app.models import Exercise, ObjectActionObservation
+from app.services.assessment_workflow import assessment_sections
 from app.services.object_action_validation import (
     validate_exercise_form,
     validate_observation_form,
@@ -71,6 +72,7 @@ def detail(exercise_id):
     if request.method == "POST":
         values, errors = validate_observation_form(request.form)
         if not errors:
+            exercise.finalized_at = None
             observation = ObjectActionObservation(
                 exercise=exercise,
                 timestamp=values["timestamp"],
@@ -111,6 +113,8 @@ def detail(exercise_id):
             active_nav="object-action",
             exercise=exercise,
             observations=observations,
+            workflow_sections=assessment_sections(exercise),
+            current_section="object_action",
             values=values,
             errors=errors,
         ),
@@ -132,6 +136,7 @@ def edit_observation(observation_id):
     if request.method == "POST":
         values, errors = validate_observation_form(request.form)
         if not errors:
+            observation.exercise.finalized_at = None
             observation.timestamp = values["timestamp"]
             observation.identified_object = values["identified_object"]
             observation.observed_action = values["observed_action"]
@@ -165,6 +170,8 @@ def edit_observation(observation_id):
             "sections/object_action/edit_observation.html",
             active_nav="object-action",
             exercise=observation.exercise,
+            workflow_sections=assessment_sections(observation.exercise),
+            current_section="object_action",
             observation=observation,
             values=values,
             errors=errors,
@@ -177,6 +184,7 @@ def edit_observation(observation_id):
 def delete_observation(observation_id):
     observation = db.get_or_404(ObjectActionObservation, observation_id)
     exercise_id = observation.exercise_id
+    observation.exercise.finalized_at = None
     db.session.delete(observation)
     try:
         db.session.commit()

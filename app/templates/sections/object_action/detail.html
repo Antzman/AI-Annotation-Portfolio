@@ -10,6 +10,8 @@
   <a class="btn btn-outline-primary action-button" href="{{ url_for('object_action.index') }}">All assessments</a>
 </section>
 
+{% include "components/assessment_nav.html" %}
+
 <section class="panel observation-entry-panel" aria-labelledby="add-observation-title">
   <div class="panel-heading">
     <div><p class="eyebrow">TIMESTAMPED FINDINGS</p><h2 id="add-observation-title">Add an observation</h2></div>

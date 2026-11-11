@@ -1,0 +1,24 @@
+<nav class="assessment-nav" aria-label="Assessment workflow">
+  <a class="assessment-nav-link{% if current_section == 'overview' %} active{% endif %}"
+     href="{{ url_for('assessment.overview', exercise_id=exercise.id) }}">Overview</a>
+  {% for section in workflow_sections %}
+    {% if section.key == 'object_action' %}
+      {% set section_url = url_for('object_action.detail', exercise_id=exercise.id) %}
+    {% elif section.key == 'movement' %}
+      {% set section_url = url_for('movement.detail', exercise_id=exercise.id) %}
+    {% elif section.key == 'quality' %}
+      {% set section_url = url_for('quality.detail', exercise_id=exercise.id) %}
+    {% else %}
+      {% set section_url = url_for('attention.detail', exercise_id=exercise.id) %}
+    {% endif %}
+  <a class="assessment-nav-link{% if current_section == section.key %} active{% endif %}"
+     href="{{ section_url }}">
+    <span>{{ section.label }}</span>
+    <small class="status-badge status-{{ section.status }}">
+      {% if section.status == 'complete' %}Completed{% elif section.status == 'in_progress' %}In Progress{% else %}Not Started{% endif %}
+    </small>
+  </a>
+  {% endfor %}
+  <a class="assessment-nav-link{% if current_section == 'review' %} active{% endif %}"
+     href="{{ url_for('assessment.review', exercise_id=exercise.id) }}">Final Review</a>
+</nav>

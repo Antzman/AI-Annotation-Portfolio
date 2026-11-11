@@ -10,6 +10,8 @@
   <a class="btn btn-outline-primary action-button" href="{{ url_for('movement.index') }}">All assessments</a>
 </section>
 
+{% include "components/assessment_nav.html" %}
+
 <section class="panel observation-entry-panel" aria-labelledby="add-movement-title">
   <div class="panel-heading">
     <div><p class="eyebrow">MOVEMENT FINDINGS</p><h2 id="add-movement-title">Add a movement observation</h2></div>
