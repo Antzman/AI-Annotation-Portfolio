@@ -1,7 +1,6 @@
 from io import BytesIO
 
 from flask import Blueprint, abort, render_template, send_file
-from werkzeug.utils import secure_filename
 
 from app.services.pdf_report import generate_pdf
 from app.services.report_data import build_report_data
@@ -36,13 +35,9 @@ def download():
         )
 
     pdf = generate_pdf(report)
-    profile_name = (
-        secure_filename(report["profile"].name)
-        if report["profile"] and report["profile"].name
-        else "AI-Annotation-Studio"
-    )
     filename = (
-        f"{profile_name}-report-{report['generated_at'].strftime('%Y-%m-%d')}.pdf"
+        f"AI-Annotation-Studio-assessment-report-"
+        f"{report['generated_at'].strftime('%Y-%m-%d')}.pdf"
     )
     response = send_file(
         BytesIO(pdf),

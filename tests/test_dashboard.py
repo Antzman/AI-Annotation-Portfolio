@@ -119,39 +119,60 @@ def test_navigation_routes_and_vendor_assets_are_local(app):
         response = client.get(path)
         assert response.status_code == 200
         assert b"This section is not available yet" in response.data
-        assert b"https://" not in response.data
 
     object_action_response = client.get("/object-action")
     assert object_action_response.status_code == 200
     assert b"Create an assessment" in object_action_response.data
-    assert b"https://" not in object_action_response.data
 
     movement_response = client.get("/movement-analysis")
     assert movement_response.status_code == 200
     assert b"No assessments available" in movement_response.data
-    assert b"https://" not in movement_response.data
 
     quality_response = client.get("/video-quality")
     assert quality_response.status_code == 200
     assert b"No assessments available" in quality_response.data
-    assert b"https://" not in quality_response.data
 
     attention_response = client.get("/attention-to-detail")
     assert attention_response.status_code == 200
     assert b"No assessments available" in attention_response.data
-    assert b"https://" not in attention_response.data
 
     report_response = client.get("/report-preview")
     assert report_response.status_code == 200
-    assert b"No assessment data yet" in report_response.data
-    assert b"https://" not in report_response.data
+    assert b"No assessment results yet" in report_response.data
 
     profile_response = client.get("/about")
     assert profile_response.status_code == 200
     assert b"Annotator Profile" in profile_response.data
     assert b"Ant" in profile_response.data
-    assert b"https://" not in profile_response.data
 
     response = client.get("/static/vendor/bootstrap/bootstrap.min.css")
     assert response.status_code == 200
     assert b"bootstrap" in response.data.lower()
+
+
+def test_social_preview_metadata_and_banner_are_served(app):
+    client = app.test_client()
+
+    dashboard = client.get("/")
+    assert dashboard.status_code == 200
+    assert b"Annotation Dashboard" in dashboard.data
+    assert b"AI Annotation Studio" in dashboard.data
+    for metadata in (
+        b'<meta property="og:type" content="website">',
+        b'<meta property="og:url" content="https://ai-annotation-portfolio.onrender.com/">',
+        b'<meta property="og:title" content="AI Annotation Studio | Manual Video Annotation Workspace">',
+        b'<meta property="og:description" content="A structured workspace for video annotation, object and action identification, movement analysis and video quality assessment.">',
+        b'<meta property="og:image" content="https://ai-annotation-portfolio.onrender.com/static/images/ai-annotation-studio-preview.png">',
+        b'<meta property="og:image:width" content="1672">',
+        b'<meta property="og:image:height" content="941">',
+        b'<meta name="twitter:card" content="summary_large_image">',
+        b'<meta name="twitter:title" content="AI Annotation Studio | Manual Video Annotation Workspace">',
+        b'<meta name="twitter:description" content="A structured workspace for video annotation, object and action identification, movement analysis and video quality assessment.">',
+        b'<meta name="twitter:image" content="https://ai-annotation-portfolio.onrender.com/static/images/ai-annotation-studio-preview.png">',
+    ):
+        assert metadata in dashboard.data
+
+    image = client.get("/static/images/ai-annotation-studio-preview.png")
+    assert image.status_code == 200
+    assert image.mimetype == "image/png"
+    assert image.data.startswith(b"\x89PNG\r\n\x1a\n")

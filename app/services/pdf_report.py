@@ -10,7 +10,6 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
-    PageBreak,
     Paragraph,
     SimpleDocTemplate,
     Spacer,
@@ -241,18 +240,17 @@ def _status_text(status):
 
 def _draw_page(canvas, document):
     canvas.saveState()
-    if document.page > 1:
-        canvas.setStrokeColor(GRID)
-        canvas.setLineWidth(0.5)
-        canvas.line(
-            PAGE_MARGIN,
-            PAGE_HEIGHT - 0.48 * inch,
-            PAGE_WIDTH - PAGE_MARGIN,
-            PAGE_HEIGHT - 0.48 * inch,
-        )
-        canvas.setFont("Vera-Bold", 7)
-        canvas.setFillColor(MUTED)
-        canvas.drawString(PAGE_MARGIN, PAGE_HEIGHT - 0.37 * inch, "AI ANNOTATION STUDIO")
+    canvas.setStrokeColor(GRID)
+    canvas.setLineWidth(0.5)
+    canvas.line(
+        PAGE_MARGIN,
+        PAGE_HEIGHT - 0.48 * inch,
+        PAGE_WIDTH - PAGE_MARGIN,
+        PAGE_HEIGHT - 0.48 * inch,
+    )
+    canvas.setFont("Vera-Bold", 7)
+    canvas.setFillColor(MUTED)
+    canvas.drawString(PAGE_MARGIN, PAGE_HEIGHT - 0.37 * inch, "AI ANNOTATION STUDIO")
     canvas.setStrokeColor(GRID)
     canvas.setLineWidth(0.5)
     canvas.line(PAGE_MARGIN, 0.48 * inch, PAGE_WIDTH - PAGE_MARGIN, 0.48 * inch)
@@ -267,37 +265,18 @@ def _quality_values(exercise):
 
 
 def _cover(story, report, styles):
-    profile = report["profile"]
-    display_name = profile.name if profile and profile.name else "Name not provided"
-    if report["is_finalized"]:
-        status = "FINALISED"
-    elif report["is_complete"]:
-        status = "READY TO FINALISE"
-    else:
-        status = "DRAFT - INCOMPLETE"
     story.extend(
         [
-            Spacer(1, 1.15 * inch),
-            _paragraph("MANUAL VIDEO ANNOTATION", styles["cover-kicker"]),
+            Spacer(1, 0.18 * inch),
+            _paragraph("AI ANNOTATION STUDIO", styles["cover-kicker"]),
             _paragraph("Assessment Report", styles["cover-title"]),
-            _paragraph(
-                "Observation, movement and footage quality assessment",
-                styles["cover-subtitle"],
-            ),
+            _paragraph("Assessment Overview", styles["cover-subtitle"]),
         ]
     )
-    rows = []
-    if len(report["exercises"]) == 1:
-        rows.append(
-            [
-                _paragraph("ASSESSMENT", styles["cover-label"]),
-                _paragraph(report["exercises"][0].title, styles["cover-value"]),
-            ]
-        )
-    rows.extend([
+    rows = [
         [
-            _paragraph("PREPARED FOR", styles["cover-label"]),
-            _paragraph(display_name, styles["cover-value"]),
+            _paragraph("ASSESSMENT STATUS", styles["cover-label"]),
+            _paragraph(report["status"], styles["cover-value"]),
         ],
         [
             _paragraph("GENERATED", styles["cover-label"]),
@@ -307,21 +286,33 @@ def _cover(story, report, styles):
             ),
         ],
         [
-            _paragraph("REPORT STATUS", styles["cover-label"]),
-            _paragraph(status, styles["cover-value"]),
-        ],
-        [
-            _paragraph("COMPLETED ASSESSMENTS", styles["cover-label"]),
-            _paragraph(
-                f'{report["completed_assessments"]} of {report["total_assessments"]}',
-                styles["cover-value"],
-            ),
-        ],
-        [
             _paragraph("ASSESSMENT PROGRESS", styles["cover-label"]),
             _paragraph(f'{report["completion"]}%', styles["cover-value"]),
         ],
-    ])
+        [
+            _paragraph("COMPLETED SECTIONS", styles["cover-label"]),
+            _paragraph(
+                f'{report["completed_sections"]} of {report["total_sections"]}',
+                styles["cover-value"],
+            ),
+        ],
+    ]
+    if len(report["exercises"]) == 1:
+        exercise = report["exercises"][0]
+        rows.insert(
+            0,
+            [
+                _paragraph("ASSESSMENT", styles["cover-label"]),
+                _paragraph(exercise.title, styles["cover-value"]),
+            ],
+        )
+        rows.insert(
+            1,
+            [
+                _paragraph("CLIP REFERENCE", styles["cover-label"]),
+                _paragraph(exercise.clip_reference or "Not provided", styles["cover-value"]),
+            ],
+        )
     facts = Table(rows, colWidths=[1.65 * inch, CONTENT_WIDTH - 1.65 * inch])
     facts.setStyle(
         TableStyle(
@@ -338,111 +329,60 @@ def _cover(story, report, styles):
     )
     story.extend(
         [
-            Spacer(1, 0.3 * inch),
+            Spacer(1, 0.14 * inch),
             facts,
-            Spacer(1, 0.35 * inch),
-            _paragraph(
-                "This report presents manually entered observations. Video files are not included or processed.",
-                styles["small"],
-            ),
-            PageBreak(),
+            Spacer(1, 0.12 * inch),
         ]
     )
-
-
-def _profile_section(story, report, styles):
-    profile = report["profile"]
-    story.append(_paragraph("Personal introduction", styles["h1"]))
-    if profile and profile.introduction:
-        story.append(_paragraph(profile.introduction, styles["body"]))
-    else:
-        story.append(
-            _paragraph("No professional introduction has been provided.", styles["body"])
-        )
-
-    fields = (
-        ("Relevant experience", "experience"),
-        ("Technical interests", "technical_interests"),
-        ("Contact information", "contact_information"),
-    )
-    rows = [[_paragraph("Profile detail", styles["table-header"]), _paragraph("Information", styles["table-header"])]]
-    for label, field in fields:
-        value = getattr(profile, field, None) if profile else None
-        rows.append(
+    if len(report["exercises"]) > 1:
+        story.append(_paragraph("Assessments included", styles["h2"]))
+        assessment_rows = [
             [
-                _paragraph(label, styles["table-label"]),
-                _paragraph(value or "Not provided.", styles["table"]),
+                _paragraph("Assessment", styles["table-header"]),
+                _paragraph("Clip reference", styles["table-header"]),
+                _paragraph("Status", styles["table-header"]),
+                _paragraph("Sections complete", styles["table-header"]),
             ]
-        )
-    story.append(_grid_table(rows, [1.65 * inch, CONTENT_WIDTH - 1.65 * inch]))
-    story.append(_paragraph("Skills and competencies", styles["h1"]))
-    if profile and profile.skills:
-        story.append(_paragraph(profile.skills, styles["body"]))
-    else:
-        story.append(_paragraph("No personal skills have been provided.", styles["body"]))
-
-    object_count = sum(len(item.object_action_observations) for item in report["exercises"])
-    movement_count = sum(len(item.movement_observations) for item in report["exercises"])
-    complete_quality = [
-        item.quality_assessment
-        for item in report["exercises"]
-        if item.quality_assessment
-        and item.quality_assessment.overall_score is not None
-    ]
-    issue_count = sum(len(item.quality_issues) for item in report["exercises"])
-    reviewed_count = sum(
-        any(
-            review.section_key == "attention_to_detail" and review.reviewed_at
-            for review in item.section_reviews
-        )
-        for item in report["exercises"]
-    )
-    evidence = [
-        ("Object & Action Annotation", f"{object_count} saved observations"),
-        ("Movement & Motion Analysis", f"{movement_count} saved observations"),
-        (
-            "Video quality assessment",
-            f"{len(complete_quality)} complete ratings; "
-            + (
-                f'mean score {report["average_quality_score"]:.1f} / 10'
-                if report["average_quality_score"] is not None
-                else "no overall score calculated"
-            ),
-        ),
-        (
-            "Annotation Quality Review",
-            f"{issue_count} issues recorded; {reviewed_count} assessments reviewed",
-        ),
-    ]
-    competency_rows = [
-        [
-            _paragraph("Competency area", styles["table-header"]),
-            _paragraph("Evidence in these assessments", styles["table-header"]),
         ]
-    ]
-    competency_rows.extend(
-        [
-            _paragraph(area, styles["table-label"]),
-            _paragraph(detail, styles["table"]),
-        ]
-        for area, detail in evidence
-    )
-    story.append(_grid_table(competency_rows, [2.05 * inch, CONTENT_WIDTH - 2.05 * inch]))
+        assessment_rows.extend(
+            [
+                _paragraph(summary["title"], styles["table"]),
+                _paragraph(summary["clip_reference"] or "Not provided", styles["table"]),
+                _paragraph(summary["status"], styles["table"]),
+                _paragraph(
+                    f'{summary["completed_sections"]} of {summary["total_sections"]}',
+                    styles["table"],
+                ),
+            ]
+            for summary in report["assessment_summaries"]
+        )
+        story.append(
+            _grid_table(
+                assessment_rows,
+                [
+                    2.0 * inch,
+                    CONTENT_WIDTH - 4.15 * inch,
+                    1.1 * inch,
+                    1.05 * inch,
+                ],
+            )
+        )
     story.append(
         _paragraph(
-            "Evidence counts summarize saved entries and do not represent an independent certification.",
+            "This report presents manually entered observations. Video files are not included or processed.",
             styles["small"],
         )
     )
-    story.append(PageBreak())
 
 
 def _object_action_table(exercise, styles):
     rows = [
         [
             _paragraph("Timestamp", styles["table-header"]),
-            _paragraph("Object", styles["table-header"]),
-            _paragraph("Observed action and notes", styles["table-header"]),
+            _paragraph("Identified object", styles["table-header"]),
+            _paragraph(
+                "Observed action and additional observations", styles["table-header"]
+            ),
         ]
     ]
     for observation in exercise.object_action_observations:
@@ -501,7 +441,7 @@ def _quality_table(exercise, styles):
     rows = [
         [
             _paragraph("Category", styles["table-header"]),
-            _paragraph("Score", styles["table-header"]),
+            _paragraph("Rating", styles["table-header"]),
             _paragraph("Explanation", styles["table-header"]),
         ]
     ]
@@ -623,18 +563,31 @@ def _assessment_sections(story, report, styles):
             )
             story.append(_quality_table(exercise, styles))
         elif assessment and assessment.ratings:
+            ratings = _quality_values(exercise)
+            missing_ratings = [
+                QUALITY_LABELS[category]
+                for category in QUALITY_CATEGORIES
+                if category not in ratings
+            ]
             story.append(
                 _paragraph(
-                    f"Incomplete: {len(assessment.ratings)} of 5 category ratings saved. "
-                    "No overall score is reported.",
+                    f"Incomplete: {len(ratings)} of 5 category ratings saved. "
+                    "Missing ratings: "
+                    + ", ".join(missing_ratings)
+                    + ". No overall score is reported.",
                     styles["body"],
                 )
             )
             story.append(_quality_table(exercise, styles))
         else:
+            missing_ratings = [
+                QUALITY_LABELS[category] for category in QUALITY_CATEGORIES
+            ]
             story.append(
                 _paragraph(
-                    "No quality ratings were saved. No overall score is reported.",
+                    "No quality ratings were saved. Missing ratings: "
+                    + ", ".join(missing_ratings)
+                    + ". No overall score is reported.",
                     styles["body"],
                 )
             )
@@ -660,7 +613,7 @@ def _assessment_sections(story, report, styles):
         elif reviewed:
             story.append(
                 _paragraph(
-                    "Reviewed; no issues were recorded.",
+                    "Review marked complete; no issues were recorded.",
                     styles["body"],
                 )
             )
@@ -675,36 +628,13 @@ def _assessment_sections(story, report, styles):
 
 def _conclusion(story, report, styles):
     story.append(_paragraph("Overall conclusion", styles["h1"]))
-    if report["is_complete"]:
-        conclusion = (
-            f'All four assessment sections are complete for '
-            f'{report["total_assessments"]} assessment(s). This report contains the '
-            "manually entered observations and ratings; video files were not included "
-            "or independently analyzed."
-        )
-    elif report["total_assessments"]:
-        pending = [
-            section["label"]
-            for section in report["sections"]
-            if section["status"] != "complete"
-        ]
-        conclusion = (
-            "This is a draft assessment report. The following sections are incomplete across "
-            "one or more assessments: "
-            + ", ".join(pending)
-            + ". Incomplete results are labeled, and no overall quality score is "
-            "reported for an assessment until all five category ratings are saved."
-        )
-    else:
-        conclusion = (
-            "No assessment results are available. Create an assessment and record "
-            "your observations before exporting an assessment report."
-        )
-    story.append(_paragraph(conclusion, styles["body"]))
+    story.append(_paragraph(report["overall_conclusion"], styles["body"]))
+    for conclusion in report["conclusions"]:
+        story.append(_paragraph(conclusion, styles["small"]))
     story.append(
         _paragraph(
-            "This report reflects the author's own observations and explanations. "
-            "Clip references are text only; no video was uploaded, included, or processed.",
+            "This report presents manually entered observations and ratings. "
+            "Clip references are text only; no video was uploaded or processed.",
             styles["small"],
         )
     )
@@ -712,11 +642,6 @@ def _conclusion(story, report, styles):
 
 def generate_pdf(report):
     output = BytesIO()
-    display_name = (
-        report["profile"].name
-        if report["profile"] and report["profile"].name
-        else "AI Annotation Studio"
-    )
     document = SimpleDocTemplate(
         output,
         pagesize=letter,
@@ -729,13 +654,18 @@ def generate_pdf(report):
             if len(report["exercises"]) == 1
             else "AI Annotation Studio Assessment Report"
         ),
-        author=display_name,
+        author="AI Annotation Studio",
     )
     styles = _styles()
-    story = []
-    _cover(story, report, styles)
-    _profile_section(story, report, styles)
-    _assessment_sections(story, report, styles)
-    _conclusion(story, report, styles)
+    story = _build_story(report, styles)
     document.build(story, onFirstPage=_draw_page, onLaterPages=_draw_page)
     return output.getvalue()
+
+
+def _build_story(report, styles=None):
+    styles = styles or _styles()
+    story = []
+    _cover(story, report, styles)
+    _assessment_sections(story, report, styles)
+    _conclusion(story, report, styles)
+    return story

@@ -182,8 +182,8 @@ def test_assessment_workflow_navigation_review_finalize_and_pdf(app, session):
 
     report_page = client.get("/report-preview")
     assert report_page.status_code == 200
-    assert b"Finalised" in report_page.data
-    assert overview_url.encode() in report_page.data
+    assert b"Completed" in report_page.data
+    assert f'href="{overview_url}"'.encode() in report_page.data
 
     overview = client.get(overview_url)
     reopened = client.post(

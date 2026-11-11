@@ -25,7 +25,7 @@ def _profile_form(token, **overrides):
     return values
 
 
-def test_profile_can_be_saved_and_included_in_report_preview(app, session):
+def test_profile_can_be_saved_without_adding_personal_data_to_report(app, session):
     client = app.test_client()
     page = client.get("/about")
     assert b'value="Ant"' in page.data
@@ -44,9 +44,9 @@ def test_profile_can_be_saved_and_included_in_report_preview(app, session):
     preview = client.get("/report-preview")
     assert preview.status_code == 200
     assert b"Assessment Reports" in preview.data
-    assert b"Alex Example" in preview.data
-    assert b"Evidence-based reasoning" in preview.data
-    assert b"alex@example.test" in preview.data
+    assert b"Alex Example" not in preview.data
+    assert b"Evidence-based reasoning" not in preview.data
+    assert b"alex@example.test" not in preview.data
 
 
 def test_profile_lengths_are_validated_and_data_can_be_cleared(app, session):
