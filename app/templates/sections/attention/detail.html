@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block page_title %}Attention to Detail · {{ exercise.title }}{% endblock %}
+{% block page_title %}Annotation Quality Review · {{ exercise.title }}{% endblock %}
 {% block content %}
 <section class="page-heading detail-heading">
   <div>
-    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('attention.index') }}">ATTENTION TO DETAIL</a> / ASSESSMENT</p>
+    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('attention.index') }}">ANNOTATION QUALITY REVIEW</a> / ASSESSMENT</p>
     <h1>{{ exercise.title }}</h1>
     <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>
   </div>

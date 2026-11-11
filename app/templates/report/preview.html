@@ -92,10 +92,10 @@
     <table class="table table-bordered report-table">
       <thead><tr><th scope="col">Competency area</th><th scope="col">Assessment evidence</th></tr></thead>
       <tbody>
-        <tr><th scope="row">Object &amp; Action Identification</th><td>{% set object_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set object_count.value = object_count.value + (exercise.object_action_observations|length) %}{% endfor %}{{ object_count.value }} saved observations</td></tr>
-        <tr><th scope="row">Movement Analysis</th><td>{% set movement_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set movement_count.value = movement_count.value + (exercise.movement_observations|length) %}{% endfor %}{{ movement_count.value }} saved observations</td></tr>
+        <tr><th scope="row">Object &amp; Action Annotation</th><td>{% set object_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set object_count.value = object_count.value + (exercise.object_action_observations|length) %}{% endfor %}{{ object_count.value }} saved observations</td></tr>
+        <tr><th scope="row">Movement &amp; Motion Analysis</th><td>{% set movement_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set movement_count.value = movement_count.value + (exercise.movement_observations|length) %}{% endfor %}{{ movement_count.value }} saved observations</td></tr>
         <tr><th scope="row">Video Quality Assessment</th><td>{% set quality_count = namespace(value=0) %}{% for exercise in report.exercises %}{% if exercise.quality_assessment and exercise.quality_assessment.overall_score is not none %}{% set quality_count.value = quality_count.value + 1 %}{% endif %}{% endfor %}{{ quality_count.value }} complete assessments{% if report.average_quality_score is not none %}; mean {{ "%.1f"|format(report.average_quality_score) }} / 10{% else %}; no overall score{% endif %}</td></tr>
-        <tr><th scope="row">Attention to Detail</th><td>{% set issue_count = namespace(value=0) %}{% set reviewed_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set issue_count.value = issue_count.value + (exercise.quality_issues|length) %}{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}{% set reviewed_count.value = reviewed_count.value + 1 %}{% endif %}{% endfor %}{{ issue_count.value }} issues; {{ reviewed_count.value }} assessments reviewed</td></tr>
+        <tr><th scope="row">Annotation Quality Review</th><td>{% set issue_count = namespace(value=0) %}{% set reviewed_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set issue_count.value = issue_count.value + (exercise.quality_issues|length) %}{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}{% set reviewed_count.value = reviewed_count.value + 1 %}{% endif %}{% endfor %}{{ issue_count.value }} issues; {{ reviewed_count.value }} assessments reviewed</td></tr>
       </tbody>
     </table>
   </div>
@@ -135,7 +135,7 @@
       </div>
 
       <section class="report-result-section">
-        <div class="report-result-heading"><h4>Object &amp; Action Identification</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].object_action }}">{% if report.exercise_sections[exercise.id].object_action == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>
+        <div class="report-result-heading"><h4>Object &amp; Action Annotation</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].object_action }}">{% if report.exercise_sections[exercise.id].object_action == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>
         {% if exercise.object_action_observations %}
         <div class="table-responsive"><table class="table table-bordered report-table">
           <thead><tr><th scope="col">Timestamp</th><th scope="col">Object</th><th scope="col">Observed action and additional observations</th></tr></thead>
@@ -147,7 +147,7 @@
       </section>
 
       <section class="report-result-section">
-        <div class="report-result-heading"><h4>Movement Analysis</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].movement }}">{% if report.exercise_sections[exercise.id].movement == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>
+        <div class="report-result-heading"><h4>Movement &amp; Motion Analysis</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].movement }}">{% if report.exercise_sections[exercise.id].movement == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>
         {% if exercise.movement_observations %}
         <div class="table-responsive"><table class="table table-bordered report-table">
           <thead><tr><th scope="col">Timestamp</th><th scope="col">Movement, reasoning, and inconsistencies</th><th scope="col">Visibility</th><th scope="col">Plausibility</th></tr></thead>
@@ -178,7 +178,7 @@
       </section>
 
       <section class="report-result-section">
-        <div class="report-result-heading"><h4>Attention to Detail</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].attention_to_detail }}">{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Reviewed{% elif report.exercise_sections[exercise.id].attention_to_detail == 'in_progress' %}Review needed{% else %}Not started{% endif %}</span></div>
+        <div class="report-result-heading"><h4>Annotation Quality Review</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].attention_to_detail }}">{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Reviewed{% elif report.exercise_sections[exercise.id].attention_to_detail == 'in_progress' %}Review needed{% else %}Not started{% endif %}</span></div>
         {% set reviewed = report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}
         {% if exercise.quality_issues %}
         {% if not reviewed %}<p class="report-empty-copy">Review not marked complete. Saved findings are shown below.</p>{% endif %}

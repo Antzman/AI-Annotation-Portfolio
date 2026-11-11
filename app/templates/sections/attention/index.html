@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block page_title %}Attention to Detail{% endblock %}
+{% block page_title %}Annotation Quality Review{% endblock %}
 {% block content %}
 <section class="page-heading">
   <div>
     <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>
-    <h1>Attention to Detail</h1>
+    <h1>Annotation Quality Review</h1>
     <p class="heading-copy">Record potential issues or confirm that you reviewed an assessment and found none.</p>
   </div>
 </section>
@@ -43,8 +43,8 @@
   <div class="panel empty-assessments">
     <span class="empty-icon" aria-hidden="true">◎</span>
     <h3>No assessments available</h3>
-    <p>Create an assessment in Object &amp; Action Identification before reviewing it for detail issues.</p>
-    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action</a>
+    <p>Create an assessment in Object &amp; Action Annotation before reviewing its annotation quality.</p>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action Annotation</a>
   </div>
   {% endif %}
 </section>

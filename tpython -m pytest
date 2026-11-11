@@ -1,0 +1,430 @@
+[1mdiff --git a/app/routes/attention.py b/app/routes/attention.py[m
+[1mindex 8a0656f..689349c 100644[m
+[1m--- a/app/routes/attention.py[m
+[1m+++ b/app/routes/attention.py[m
+[36m@@ -209,5 +209,5 @@[m [mdef mark_reviewed(exercise_id):[m
+             url_for("attention.detail", exercise_id=exercise.id),[m
+             "attention-to-detail",[m
+         )[m
+[31m-    flash("Attention to Detail marked as reviewed.", "success")[m
+[32m+[m[32m    flash("Annotation Quality Review marked as reviewed.", "success")[m
+     return redirect(url_for("attention.detail", exercise_id=exercise.id))[m
+[1mdiff --git a/app/services/dashboard.py b/app/services/dashboard.py[m
+[1mindex 870d8d5..a62af02 100644[m
+[1m--- a/app/services/dashboard.py[m
+[1m+++ b/app/services/dashboard.py[m
+[36m@@ -23,10 +23,10 @@[m [mclass Activity:[m
+ [m
+ [m
+ SECTION_LABELS = ([m
+[31m-    ("object_action", "Object & Action Identification"),[m
+[31m-    ("movement", "Movement Analysis"),[m
+[32m+[m[32m    ("object_action", "Object & Action Annotation"),[m
+[32m+[m[32m    ("movement", "Movement & Motion Analysis"),[m
+     ("quality", "Video Quality Assessment"),[m
+[31m-    ("attention_to_detail", "Attention to Detail"),[m
+[32m+[m[32m    ("attention_to_detail", "Annotation Quality Review"),[m
+ )[m
+ [m
+ [m
+[36m@@ -181,7 +181,7 @@[m [mdef get_dashboard_data():[m
+     activities.extend([m
+         _activity_rows([m
+             SectionReview,[m
+[31m-            "Attention review completed",[m
+[32m+[m[32m            "Annotation quality review completed",[m
+             lambda row: row.exercise.title,[m
+             SectionReview.reviewed_at,[m
+         )[m
+[1mdiff --git a/app/services/pdf_report.py b/app/services/pdf_report.py[m
+[1mindex 91b9955..d907f84 100644[m
+[1m--- a/app/services/pdf_report.py[m
+[1m+++ b/app/services/pdf_report.py[m
+[36m@@ -385,8 +385,8 @@[m [mdef _profile_section(story, report, styles):[m
+         for item in report["exercises"][m
+     )[m
+     evidence = [[m
+[31m-        ("Object/action identification", f"{object_count} saved observations"),[m
+[31m-        ("Movement analysis", f"{movement_count} saved observations"),[m
+[32m+[m[32m        ("Object & Action Annotation", f"{object_count} saved observations"),[m
+[32m+[m[32m        ("Movement & Motion Analysis", f"{movement_count} saved observations"),[m
+         ([m
+             "Video quality assessment",[m
+             f"{len(complete_quality)} complete ratings; "[m
+[36m@@ -397,7 +397,7 @@[m [mdef _profile_section(story, report, styles):[m
+             ),[m
+         ),[m
+         ([m
+[31m-            "Attention to detail",[m
+[32m+[m[32m            "Annotation Quality Review",[m
+             f"{issue_count} issues recorded; {reviewed_count} assessments reviewed",[m
+         ),[m
+     ][m
+[36m@@ -576,7 +576,7 @@[m [mdef _assessment_sections(story, report, styles):[m
+         )[m
+         story.append(_grid_table(status_rows, [3.25 * inch, CONTENT_WIDTH - 3.25 * inch]))[m
+ [m
+[31m-        story.append(_paragraph("Object & Action Identification", styles["h3"]))[m
+[32m+[m[32m        story.append(_paragraph("Object & Action Annotation", styles["h3"]))[m
+         if exercise.object_action_observations:[m
+             story.append(_object_action_table(exercise, styles))[m
+         else:[m
+[36m@@ -587,7 +587,7 @@[m [mdef _assessment_sections(story, report, styles):[m
+                 )[m
+             )[m
+ [m
+[31m-        story.append(_paragraph("Movement Analysis", styles["h3"]))[m
+[32m+[m[32m        story.append(_paragraph("Movement & Motion Analysis", styles["h3"]))[m
+         if exercise.movement_observations:[m
+             story.append(_movement_table(exercise, styles))[m
+         else:[m
+[36m@@ -626,7 +626,7 @@[m [mdef _assessment_sections(story, report, styles):[m
+                 )[m
+             )[m
+ [m
+[31m-        story.append(_paragraph("Attention to Detail", styles["h3"]))[m
+[32m+[m[32m        story.append(_paragraph("Annotation Quality Review", styles["h3"]))[m
+         reviewed = any([m
+             review.section_key == "attention_to_detail" and review.reviewed_at[m
+             for review in exercise.section_reviews[m
+[1mdiff --git a/app/services/report_data.py b/app/services/report_data.py[m
+[1mindex b5e760a..38f8eb5 100644[m
+[1m--- a/app/services/report_data.py[m
+[1m+++ b/app/services/report_data.py[m
+[36m@@ -7,10 +7,10 @@[m [mfrom app.extensions import db[m
+ from app.models import Exercise, QualityAssessment, UserProfile[m
+ [m
+ SECTION_DETAILS = ([m
+[31m-    ("object_action", "Object & Action Identification"),[m
+[31m-    ("movement", "Movement Analysis"),[m
+[32m+[m[32m    ("object_action", "Object & Action Annotation"),[m
+[32m+[m[32m    ("movement", "Movement & Motion Analysis"),[m
+     ("quality", "Video Quality Assessment"),[m
+[31m-    ("attention_to_detail", "Attention to Detail"),[m
+[32m+[m[32m    ("attention_to_detail", "Annotation Quality Review"),[m
+ )[m
+ [m
+ [m
+[1mdiff --git a/app/templates/base.html b/app/templates/base.html[m
+[1mindex 6777df0..12ddafe 100644[m
+[1m--- a/app/templates/base.html[m
+[1m+++ b/app/templates/base.html[m
+[36m@@ -24,11 +24,11 @@[m
+         <span class="nav-caption nav-caption-spaced">ASSESSMENTS</span>[m
+         <a class="nav-link{% if active_nav == 'object-action' %} active{% endif %}"[m
+            href="{{ url_for('object_action.index') }}" {% if active_nav == 'object-action' %}aria-current="page"{% endif %}>[m
+[31m-          <span class="nav-icon" aria-hidden="true">◉</span>Object &amp; Action Identification[m
+[32m+[m[32m          <span class="nav-icon" aria-hidden="true">◉</span>Object &amp; Action Annotation[m
+         </a>[m
+         <a class="nav-link{% if active_nav == 'movement-analysis' %} active{% endif %}"[m
+            href="{{ url_for('movement.index') }}" {% if active_nav == 'movement-analysis' %}aria-current="page"{% endif %}>[m
+[31m-          <span class="nav-icon" aria-hidden="true">↗</span>Movement Analysis[m
+[32m+[m[32m          <span class="nav-icon" aria-hidden="true">↗</span>Movement &amp; Motion Analysis[m
+         </a>[m
+         <a class="nav-link{% if active_nav == 'video-quality' %} active{% endif %}"[m
+            href="{{ url_for('quality.index') }}" {% if active_nav == 'video-quality' %}aria-current="page"{% endif %}>[m
+[36m@@ -36,7 +36,7 @@[m
+         </a>[m
+         <a class="nav-link{% if active_nav == 'attention-to-detail' %} active{% endif %}"[m
+            href="{{ url_for('attention.index') }}" {% if active_nav == 'attention-to-detail' %}aria-current="page"{% endif %}>[m
+[31m-          <span class="nav-icon" aria-hidden="true">◎</span>Attention to Detail[m
+[32m+[m[32m          <span class="nav-icon" aria-hidden="true">◎</span>Annotation Quality Review[m
+         </a>[m
+         <span class="nav-caption nav-caption-spaced">MY WORK</span>[m
+         <a class="nav-link{% if active_nav == 'report-preview' %} active{% endif %}"[m
+[1mdiff --git a/app/templates/dashboard/index.html b/app/templates/dashboard/index.html[m
+[1mindex 3c016a7..8c676d0 100644[m
+[1m--- a/app/templates/dashboard/index.html[m
+[1m+++ b/app/templates/dashboard/index.html[m
+[36m@@ -37,7 +37,7 @@[m
+ <div class="dashboard-columns">[m
+   <section class="panel section-panel" aria-labelledby="section-progress-title">[m
+     <div class="panel-heading">[m
+[31m-      <div><p class="eyebrow">ASSESSMENT WORKFLOW</p><h2 id="section-progress-title">Assessment Progress</h2></div>[m
+[32m+[m[32m      <div><p class="eyebrow">ANNOTATION ASSESSMENT WORKFLOW</p><h2 id="section-progress-title">Assessment Progress</h2></div>[m
+       <span class="panel-tag">4 sections</span>[m
+     </div>[m
+     <div class="section-list">[m
+[36m@@ -102,10 +102,10 @@[m
+ <section class="quick-start">[m
+   <div><p class="eyebrow">QUICK NAVIGATION</p><h2>Continue annotation work</h2><p>Choose an assessment module to continue.</p></div>[m
+   <div class="quick-links">[m
+[31m-    <a class="quick-link" href="{{ url_for('object_action.index') }}">Object &amp; Action Identification <span aria-hidden="true">→</span></a>[m
+[31m-    <a class="quick-link" href="{{ url_for('movement.index') }}">Movement Analysis <span aria-hidden="true">→</span></a>[m
+[32m+[m[32m    <a class="quick-link" href="{{ url_for('object_action.index') }}">Object &amp; Action Annotation <span aria-hidden="true">→</span></a>[m
+[32m+[m[32m    <a class="quick-link" href="{{ url_for('movement.index') }}">Movement &amp; Motion Analysis <span aria-hidden="true">→</span></a>[m
+     <a class="quick-link" href="{{ url_for('quality.index') }}">Video Quality Assessment <span aria-hidden="true">→</span></a>[m
+[31m-    <a class="quick-link" href="{{ url_for('attention.index') }}">Attention to Detail <span aria-hidden="true">→</span></a>[m
+[32m+[m[32m    <a class="quick-link" href="{{ url_for('attention.index') }}">Annotation Quality Review <span aria-hidden="true">→</span></a>[m
+     <a class="quick-link" href="{{ url_for('report.preview') }}">Assessment Reports <span aria-hidden="true">→</span></a>[m
+   </div>[m
+ </section>[m
+[1mdiff --git a/app/templates/report/preview.html b/app/templates/report/preview.html[m
+[1mindex 6e4a305..ca41861 100644[m
+[1m--- a/app/templates/report/preview.html[m
+[1m+++ b/app/templates/report/preview.html[m
+[36m@@ -92,10 +92,10 @@[m
+     <table class="table table-bordered report-table">[m
+       <thead><tr><th scope="col">Competency area</th><th scope="col">Assessment evidence</th></tr></thead>[m
+       <tbody>[m
+[31m-        <tr><th scope="row">Object &amp; Action Identification</th><td>{% set object_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set object_count.value = object_count.value + (exercise.object_action_observations|length) %}{% endfor %}{{ object_count.value }} saved observations</td></tr>[m
+[31m-        <tr><th scope="row">Movement Analysis</th><td>{% set movement_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set movement_count.value = movement_count.value + (exercise.movement_observations|length) %}{% endfor %}{{ movement_count.value }} saved observations</td></tr>[m
+[32m+[m[32m        <tr><th scope="row">Object &amp; Action Annotation</th><td>{% set object_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set object_count.value = object_count.value + (exercise.object_action_observations|length) %}{% endfor %}{{ object_count.value }} saved observations</td></tr>[m
+[32m+[m[32m        <tr><th scope="row">Movement &amp; Motion Analysis</th><td>{% set movement_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set movement_count.value = movement_count.value + (exercise.movement_observations|length) %}{% endfor %}{{ movement_count.value }} saved observations</td></tr>[m
+         <tr><th scope="row">Video Quality Assessment</th><td>{% set quality_count = namespace(value=0) %}{% for exercise in report.exercises %}{% if exercise.quality_assessment and exercise.quality_assessment.overall_score is not none %}{% set quality_count.value = quality_count.value + 1 %}{% endif %}{% endfor %}{{ quality_count.value }} complete assessments{% if report.average_quality_score is not none %}; mean {{ "%.1f"|format(report.average_quality_score) }} / 10{% else %}; no overall score{% endif %}</td></tr>[m
+[31m-        <tr><th scope="row">Attention to Detail</th><td>{% set issue_count = namespace(value=0) %}{% set reviewed_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set issue_count.value = issue_count.value + (exercise.quality_issues|length) %}{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}{% set reviewed_count.value = reviewed_count.value + 1 %}{% endif %}{% endfor %}{{ issue_count.value }} issues; {{ reviewed_count.value }} assessments reviewed</td></tr>[m
+[32m+[m[32m        <tr><th scope="row">Annotation Quality Review</th><td>{% set issue_count = namespace(value=0) %}{% set reviewed_count = namespace(value=0) %}{% for exercise in report.exercises %}{% set issue_count.value = issue_count.value + (exercise.quality_issues|length) %}{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}{% set reviewed_count.value = reviewed_count.value + 1 %}{% endif %}{% endfor %}{{ issue_count.value }} issues; {{ reviewed_count.value }} assessments reviewed</td></tr>[m
+       </tbody>[m
+     </table>[m
+   </div>[m
+[36m@@ -135,7 +135,7 @@[m
+       </div>[m
+ [m
+       <section class="report-result-section">[m
+[31m-        <div class="report-result-heading"><h4>Object &amp; Action Identification</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].object_action }}">{% if report.exercise_sections[exercise.id].object_action == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>[m
+[32m+[m[32m        <div class="report-result-heading"><h4>Object &amp; Action Annotation</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].object_action }}">{% if report.exercise_sections[exercise.id].object_action == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>[m
+         {% if exercise.object_action_observations %}[m
+         <div class="table-responsive"><table class="table table-bordered report-table">[m
+           <thead><tr><th scope="col">Timestamp</th><th scope="col">Object</th><th scope="col">Observed action and additional observations</th></tr></thead>[m
+[36m@@ -147,7 +147,7 @@[m
+       </section>[m
+ [m
+       <section class="report-result-section">[m
+[31m-        <div class="report-result-heading"><h4>Movement Analysis</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].movement }}">{% if report.exercise_sections[exercise.id].movement == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>[m
+[32m+[m[32m        <div class="report-result-heading"><h4>Movement &amp; Motion Analysis</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].movement }}">{% if report.exercise_sections[exercise.id].movement == 'complete' %}Complete{% else %}Not started{% endif %}</span></div>[m
+         {% if exercise.movement_observations %}[m
+         <div class="table-responsive"><table class="table table-bordered report-table">[m
+           <thead><tr><th scope="col">Timestamp</th><th scope="col">Movement, reasoning, and inconsistencies</th><th scope="col">Visibility</th><th scope="col">Plausibility</th></tr></thead>[m
+[36m@@ -178,7 +178,7 @@[m
+       </section>[m
+ [m
+       <section class="report-result-section">[m
+[31m-        <div class="report-result-heading"><h4>Attention to Detail</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].attention_to_detail }}">{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Reviewed{% elif report.exercise_sections[exercise.id].attention_to_detail == 'in_progress' %}Review needed{% else %}Not started{% endif %}</span></div>[m
+[32m+[m[32m        <div class="report-result-heading"><h4>Annotation Quality Review</h4><span class="status-badge status-{{ report.exercise_sections[exercise.id].attention_to_detail }}">{% if report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}Reviewed{% elif report.exercise_sections[exercise.id].attention_to_detail == 'in_progress' %}Review needed{% else %}Not started{% endif %}</span></div>[m
+         {% set reviewed = report.exercise_sections[exercise.id].attention_to_detail == 'complete' %}[m
+         {% if exercise.quality_issues %}[m
+         {% if not reviewed %}<p class="report-empty-copy">Review not marked complete. Saved findings are shown below.</p>{% endif %}[m
+[1mdiff --git a/app/templates/sections/attention/detail.html b/app/templates/sections/attention/detail.html[m
+[1mindex a739db6..d18b306 100644[m
+[1m--- a/app/templates/sections/attention/detail.html[m
+[1m+++ b/app/templates/sections/attention/detail.html[m
+[36m@@ -1,9 +1,9 @@[m
+ {% extends "base.html" %}[m
+[31m-{% block page_title %}Attention to Detail · {{ exercise.title }}{% endblock %}[m
+[32m+[m[32m{% block page_title %}Annotation Quality Review · {{ exercise.title }}{% endblock %}[m
+ {% block content %}[m
+ <section class="page-heading detail-heading">[m
+   <div>[m
+[31m-    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('attention.index') }}">ATTENTION TO DETAIL</a> / ASSESSMENT</p>[m
+[32m+[m[32m    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('attention.index') }}">ANNOTATION QUALITY REVIEW</a> / ASSESSMENT</p>[m
+     <h1>{{ exercise.title }}</h1>[m
+     <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>[m
+   </div>[m
+[1mdiff --git a/app/templates/sections/attention/edit_issue.html b/app/templates/sections/attention/edit_issue.html[m
+[1mindex 4c295b6..e46dbd5 100644[m
+[1m--- a/app/templates/sections/attention/edit_issue.html[m
+[1m+++ b/app/templates/sections/attention/edit_issue.html[m
+[36m@@ -10,7 +10,7 @@[m
+ </section>[m
+ <section class="panel observation-entry-panel edit-observation-panel" aria-labelledby="edit-issue-title">[m
+   <div class="panel-heading">[m
+[31m-    <div><p class="eyebrow">ATTENTION TO DETAIL</p><h2 id="edit-issue-title">Issue details</h2></div>[m
+[32m+[m[32m    <div><p class="eyebrow">ANNOTATION QUALITY REVIEW</p><h2 id="edit-issue-title">Issue details</h2></div>[m
+   </div>[m
+   {% set form_action = url_for('attention.edit_issue', issue_id=issue.id) %}[m
+   {% set submit_label = 'Save changes' %}[m
+[1mdiff --git a/app/templates/sections/attention/index.html b/app/templates/sections/attention/index.html[m
+[1mindex 1643900..d74bc34 100644[m
+[1m--- a/app/templates/sections/attention/index.html[m
+[1m+++ b/app/templates/sections/attention/index.html[m
+[36m@@ -1,10 +1,10 @@[m
+ {% extends "base.html" %}[m
+[31m-{% block page_title %}Attention to Detail{% endblock %}[m
+[32m+[m[32m{% block page_title %}Annotation Quality Review{% endblock %}[m
+ {% block content %}[m
+ <section class="page-heading">[m
+   <div>[m
+     <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>[m
+[31m-    <h1>Attention to Detail</h1>[m
+[32m+[m[32m    <h1>Annotation Quality Review</h1>[m
+     <p class="heading-copy">Record potential issues or confirm that you reviewed an assessment and found none.</p>[m
+   </div>[m
+ </section>[m
+[36m@@ -43,8 +43,8 @@[m
+   <div class="panel empty-assessments">[m
+     <span class="empty-icon" aria-hidden="true">◎</span>[m
+     <h3>No assessments available</h3>[m
+[31m-    <p>Create an assessment in Object &amp; Action Identification before reviewing it for detail issues.</p>[m
+[31m-    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action</a>[m
+[32m+[m[32m    <p>Create an assessment in Object &amp; Action Annotation before reviewing its annotation quality.</p>[m
+[32m+[m[32m    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action Annotation</a>[m
+   </div>[m
+   {% endif %}[m
+ </section>[m
+[1mdiff --git a/app/templates/sections/movement/detail.html b/app/templates/sections/movement/detail.html[m
+[1mindex 53643fd..3e64107 100644[m
+[1m--- a/app/templates/sections/movement/detail.html[m
+[1m+++ b/app/templates/sections/movement/detail.html[m
+[36m@@ -1,9 +1,9 @@[m
+ {% extends "base.html" %}[m
+[31m-{% block page_title %}Movement Analysis · {{ exercise.title }}{% endblock %}[m
+[32m+[m[32m{% block page_title %}Movement &amp; Motion Analysis · {{ exercise.title }}{% endblock %}[m
+ {% block content %}[m
+ <section class="page-heading detail-heading">[m
+   <div>[m
+[31m-    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('movement.index') }}">MOVEMENT ANALYSIS</a> / ASSESSMENT</p>[m
+[32m+[m[32m    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('movement.index') }}">MOVEMENT &amp; MOTION ANALYSIS</a> / ASSESSMENT</p>[m
+     <h1>{{ exercise.title }}</h1>[m
+     <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>[m
+   </div>[m
+[1mdiff --git a/app/templates/sections/movement/edit_observation.html b/app/templates/sections/movement/edit_observation.html[m
+[1mindex 88eb7c1..0dd7b1c 100644[m
+[1m--- a/app/templates/sections/movement/edit_observation.html[m
+[1m+++ b/app/templates/sections/movement/edit_observation.html[m
+[36m@@ -10,7 +10,7 @@[m
+ </section>[m
+ <section class="panel observation-entry-panel edit-observation-panel" aria-labelledby="edit-movement-title">[m
+   <div class="panel-heading">[m
+[31m-    <div><p class="eyebrow">MOVEMENT ANALYSIS</p><h2 id="edit-movement-title">Observation details</h2></div>[m
+[32m+[m[32m    <div><p class="eyebrow">MOVEMENT &amp; MOTION ANALYSIS</p><h2 id="edit-movement-title">Observation details</h2></div>[m
+   </div>[m
+   {% set form_action = url_for('movement.edit_observation', observation_id=observation.id) %}[m
+   {% set submit_label = 'Save changes' %}[m
+[1mdiff --git a/app/templates/sections/movement/index.html b/app/templates/sections/movement/index.html[m
+[1mindex c6edfdd..92485ca 100644[m
+[1m--- a/app/templates/sections/movement/index.html[m
+[1m+++ b/app/templates/sections/movement/index.html[m
+[36m@@ -1,10 +1,10 @@[m
+ {% extends "base.html" %}[m
+[31m-{% block page_title %}Movement Analysis{% endblock %}[m
+[32m+[m[32m{% block page_title %}Movement &amp; Motion Analysis{% endblock %}[m
+ {% block content %}[m
+ <section class="page-heading">[m
+   <div>[m
+     <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>[m
+[31m-    <h1>Movement Analysis</h1>[m
+[32m+[m[32m    <h1>Movement &amp; Motion Analysis</h1>[m
+     <p class="heading-copy">Describe movement, assess its visibility and plausibility, and explain your reasoning.</p>[m
+   </div>[m
+ </section>[m
+[36m@@ -32,8 +32,8 @@[m
+   <div class="panel empty-assessments">[m
+     <span class="empty-icon" aria-hidden="true">↗</span>[m
+     <h3>No assessments available</h3>[m
+[31m-    <p>Create an assessment in Object &amp; Action Identification before recording movement analysis.</p>[m
+[31m-    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action</a>[m
+[32m+[m[32m    <p>Create an assessment in Object &amp; Action Annotation before recording movement and motion observations.</p>[m
+[32m+[m[32m    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action Annotation</a>[m
+   </div>[m
+   {% endif %}[m
+ </section>[m
+[1mdiff --git a/app/templates/sections/object_action/detail.html b/app/templates/sections/object_action/detail.html[m
+[1mindex 3ebce46..ed6551c 100644[m
+[1m--- a/app/templates/sections/object_action/detail.html[m
+[1m+++ b/app/templates/sections/object_action/detail.html[m
+[36m@@ -3,7 +3,7 @@[m
+ {% block content %}[m
+ <section class="page-heading detail-heading">[m
+   <div>[m
+[31m-    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('object_action.index') }}">OBJECT &amp; ACTION</a> / ASSESSMENT</p>[m
+[32m+[m[32m    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('object_action.index') }}">OBJECT &amp; ACTION ANNOTATION</a> / ASSESSMENT</p>[m
+     <h1>{{ exercise.title }}</h1>[m
+     <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>[m
+   </div>[m
+[1mdiff --git a/app/templates/sections/object_action/edit_observation.html b/app/templates/sections/object_action/edit_observation.html[m
+[1mindex 13c708f..ba23ac4 100644[m
+[1m--- a/app/templates/sections/object_action/edit_observation.html[m
+[1m+++ b/app/templates/sections/object_action/edit_observation.html[m
+[36m@@ -10,7 +10,7 @@[m
+ </section>[m
+ <section class="panel observation-entry-panel edit-observation-panel" aria-labelledby="edit-observation-title">[m
+   <div class="panel-heading">[m
+[31m-    <div><p class="eyebrow">OBJECT &amp; ACTION</p><h2 id="edit-observation-title">Observation details</h2></div>[m
+[32m+[m[32m    <div><p class="eyebrow">OBJECT &amp; ACTION ANNOTATION</p><h2 id="edit-observation-title">Observation details</h2></div>[m
+   </div>[m
+   {% set form_action = url_for('object_action.edit_observation', observation_id=observation.id) %}[m
+   {% set submit_label = 'Save changes' %}[m
+[1mdiff --git a/app/templates/sections/object_action/index.html b/app/templates/sections/object_action/index.html[m
+[1mindex ccf5a30..56733ed 100644[m
+[1m--- a/app/templates/sections/object_action/index.html[m
+[1m+++ b/app/templates/sections/object_action/index.html[m
+[36m@@ -1,11 +1,11 @@[m
+ {% extends "base.html" %}[m
+[31m-{% block page_title %}Object &amp; Action Identification{% endblock %}[m
+[32m+[m[32m{% block page_title %}Object &amp; Action Annotation{% endblock %}[m
+ {% block content %}[m
+ <section class="page-heading">[m
+   <div>[m
+     <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>[m
+[31m-    <h1>Object &amp; Action Identification</h1>[m
+[31m-    <p class="heading-copy">Create an assessment for a clip reference, then add observations at specific timestamps.</p>[m
+[32m+[m[32m    <h1>Object &amp; Action Annotation</h1>[m
+[32m+[m[32m    <p class="heading-copy">Identify visible objects and describe their actions at specific timestamps in a referenced clip.</p>[m
+   </div>[m
+ </section>[m
+ [m
+[1mdiff --git a/app/templates/sections/quality/detail.html b/app/templates/sections/quality/detail.html[m
+[1mindex 0701548..0a3f6c5 100644[m
+[1m--- a/app/templates/sections/quality/detail.html[m
+[1m+++ b/app/templates/sections/quality/detail.html[m
+[36m@@ -1,9 +1,9 @@[m
+ {% extends "base.html" %}[m
+[31m-{% block page_title %}Video Quality · {{ exercise.title }}{% endblock %}[m
+[32m+[m[32m{% block page_title %}Video Quality Assessment · {{ exercise.title }}{% endblock %}[m
+ {% block content %}[m
+ <section class="page-heading detail-heading">[m
+   <div>[m
+[31m-    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('quality.index') }}">VIDEO QUALITY</a> / ASSESSMENT</p>[m
+[32m+[m[32m    <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('quality.index') }}">VIDEO QUALITY ASSESSMENT</a> / ASSESSMENT</p>[m
+     <h1>{{ exercise.title }}</h1>[m
+     <p class="heading-copy">{{ exercise.clip_reference or 'No clip reference added' }}</p>[m
+   </div>[m
+[1mdiff --git a/app/templates/sections/quality/index.html b/app/templates/sections/quality/index.html[m
+[1mindex c9a387a..4cc202a 100644[m
+[1m--- a/app/templates/sections/quality/index.html[m
+[1m+++ b/app/templates/sections/quality/index.html[m
+[36m@@ -42,8 +42,8 @@[m
+   <div class="panel empty-assessments">[m
+     <span class="empty-icon" aria-hidden="true">◫</span>[m
+     <h3>No assessments available</h3>[m
+[31m-    <p>Create an assessment in Object &amp; Action Identification before rating its footage quality.</p>[m
+[31m-    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action</a>[m
+[32m+[m[32m    <p>Create an assessment in Object &amp; Action Annotation before rating its footage quality.</p>[m
+[32m+[m[32m    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action Annotation</a>[m
+   </div>[m
+   {% endif %}[m
+ </section>[m
+[1mdiff --git a/tests/test_dashboard.py b/tests/test_dashboard.py[m
+[1mindex 663e2fd..e3e6982 100644[m
+[1m--- a/tests/test_dashboard.py[m
+[1m+++ b/tests/test_dashboard.py[m
+[36m@@ -59,10 +59,10 @@[m [mdef test_dashboard_empty_database_shows_zero_completion_and_not_started(app):[m
+     assert b"Recent Activity" in response.data[m
+     assert b"AI Annotation Studio" in response.data[m
+     assert b"Assessment Reports" in response.data[m
+[31m-    assert b"Object &amp; Action Identification" in response.data[m
+[31m-    assert b"Movement Analysis" in response.data[m
+[32m+[m[32m    assert b"Object &amp; Action Annotation" in response.data[m
+[32m+[m[32m    assert b"Movement &amp; Motion Analysis" in response.data[m
+     assert b"Video Quality Assessment" in response.data[m
+[31m-    assert b"Attention to Detail" in response.data[m
+[32m+[m[32m    assert b"Annotation Quality Review" in response.data[m
+     assert b"Demonstration workspace" in response.data[m
+     assert b"data may reset periodically" in response.data[m
+     assert b"0 of 0 assessments complete" in response.data[m
+[1mdiff --git a/tests/test_report.py b/tests/test_report.py[m
+[1mindex 35aa01a..58d0ea0 100644[m
+[1m--- a/tests/test_report.py[m
+[1m+++ b/tests/test_report.py[m
+[36m@@ -124,7 +124,10 @@[m [mdef test_report_pdf_is_paginated_detailed_and_downloadable(app, session):[m
+     preview = client.get("/report-preview")[m
+     assert preview.status_code == 200[m
+     assert b"Jordan Reviewer" in preview.data[m
+[31m-    assert b"Object &amp; Action Identification" in preview.data[m
+[32m+[m[32m    assert b"Object &amp; Action Annotation" in preview.data[m
+[32m+[m[32m    assert b"Movement &amp; Motion Analysis" in preview.data[m
+[32m+[m[32m    assert b"Video Quality Assessment" in preview.data[m
+[32m+[m[32m    assert b"Annotation Quality Review" in preview.data[m
+     assert b"Observed evidence for visual_clarity" in preview.data[m
+     assert b"Suggested correction" in preview.data[m
+     assert b"Complete" in preview.data[m

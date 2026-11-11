@@ -7,10 +7,10 @@ from app.extensions import db
 from app.models import Exercise, QualityAssessment, UserProfile
 
 SECTION_DETAILS = (
-    ("object_action", "Object & Action Identification"),
-    ("movement", "Movement Analysis"),
+    ("object_action", "Object & Action Annotation"),
+    ("movement", "Movement & Motion Analysis"),
     ("quality", "Video Quality Assessment"),
-    ("attention_to_detail", "Attention to Detail"),
+    ("attention_to_detail", "Annotation Quality Review"),
 )
 
 

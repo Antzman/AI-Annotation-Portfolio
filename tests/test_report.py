@@ -124,7 +124,10 @@ def test_report_pdf_is_paginated_detailed_and_downloadable(app, session):
     preview = client.get("/report-preview")
     assert preview.status_code == 200
     assert b"Jordan Reviewer" in preview.data
-    assert b"Object &amp; Action Identification" in preview.data
+    assert b"Object &amp; Action Annotation" in preview.data
+    assert b"Movement &amp; Motion Analysis" in preview.data
+    assert b"Video Quality Assessment" in preview.data
+    assert b"Annotation Quality Review" in preview.data
     assert b"Observed evidence for visual_clarity" in preview.data
     assert b"Suggested correction" in preview.data
     assert b"Complete" in preview.data

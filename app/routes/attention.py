@@ -209,5 +209,5 @@ def mark_reviewed(exercise_id):
             url_for("attention.detail", exercise_id=exercise.id),
             "attention-to-detail",
         )
-    flash("Attention to Detail marked as reviewed.", "success")
+    flash("Annotation Quality Review marked as reviewed.", "success")
     return redirect(url_for("attention.detail", exercise_id=exercise.id))

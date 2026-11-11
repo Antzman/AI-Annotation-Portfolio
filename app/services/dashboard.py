@@ -23,10 +23,10 @@ class Activity:
 
 
 SECTION_LABELS = (
-    ("object_action", "Object & Action Identification"),
-    ("movement", "Movement Analysis"),
+    ("object_action", "Object & Action Annotation"),
+    ("movement", "Movement & Motion Analysis"),
     ("quality", "Video Quality Assessment"),
-    ("attention_to_detail", "Attention to Detail"),
+    ("attention_to_detail", "Annotation Quality Review"),
 )
 
 
@@ -181,7 +181,7 @@ def get_dashboard_data():
     activities.extend(
         _activity_rows(
             SectionReview,
-            "Attention review completed",
+            "Annotation quality review completed",
             lambda row: row.exercise.title,
             SectionReview.reviewed_at,
         )

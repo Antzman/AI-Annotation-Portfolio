@@ -385,8 +385,8 @@ def _profile_section(story, report, styles):
         for item in report["exercises"]
     )
     evidence = [
-        ("Object/action identification", f"{object_count} saved observations"),
-        ("Movement analysis", f"{movement_count} saved observations"),
+        ("Object & Action Annotation", f"{object_count} saved observations"),
+        ("Movement & Motion Analysis", f"{movement_count} saved observations"),
         (
             "Video quality assessment",
             f"{len(complete_quality)} complete ratings; "
@@ -397,7 +397,7 @@ def _profile_section(story, report, styles):
             ),
         ),
         (
-            "Attention to detail",
+            "Annotation Quality Review",
             f"{issue_count} issues recorded; {reviewed_count} assessments reviewed",
         ),
     ]
@@ -576,7 +576,7 @@ def _assessment_sections(story, report, styles):
         )
         story.append(_grid_table(status_rows, [3.25 * inch, CONTENT_WIDTH - 3.25 * inch]))
 
-        story.append(_paragraph("Object & Action Identification", styles["h3"]))
+        story.append(_paragraph("Object & Action Annotation", styles["h3"]))
         if exercise.object_action_observations:
             story.append(_object_action_table(exercise, styles))
         else:
@@ -587,7 +587,7 @@ def _assessment_sections(story, report, styles):
                 )
             )
 
-        story.append(_paragraph("Movement Analysis", styles["h3"]))
+        story.append(_paragraph("Movement & Motion Analysis", styles["h3"]))
         if exercise.movement_observations:
             story.append(_movement_table(exercise, styles))
         else:
@@ -626,7 +626,7 @@ def _assessment_sections(story, report, styles):
                 )
             )
 
-        story.append(_paragraph("Attention to Detail", styles["h3"]))
+        story.append(_paragraph("Annotation Quality Review", styles["h3"]))
         reviewed = any(
             review.section_key == "attention_to_detail" and review.reviewed_at
             for review in exercise.section_reviews

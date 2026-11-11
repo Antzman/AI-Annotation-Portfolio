@@ -59,10 +59,10 @@ def test_dashboard_empty_database_shows_zero_completion_and_not_started(app):
     assert b"Recent Activity" in response.data
     assert b"AI Annotation Studio" in response.data
     assert b"Assessment Reports" in response.data
-    assert b"Object &amp; Action Identification" in response.data
-    assert b"Movement Analysis" in response.data
+    assert b"Object &amp; Action Annotation" in response.data
+    assert b"Movement &amp; Motion Analysis" in response.data
     assert b"Video Quality Assessment" in response.data
-    assert b"Attention to Detail" in response.data
+    assert b"Annotation Quality Review" in response.data
     assert b"Demonstration workspace" in response.data
     assert b"data may reset periodically" in response.data
     assert b"0 of 0 assessments complete" in response.data

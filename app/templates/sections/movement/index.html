@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block page_title %}Movement Analysis{% endblock %}
+{% block page_title %}Movement &amp; Motion Analysis{% endblock %}
 {% block content %}
 <section class="page-heading">
   <div>
     <p class="eyebrow"><a class="breadcrumb-link" href="{{ url_for('dashboard.index') }}">DASHBOARD</a> / ASSESSMENTS</p>
-    <h1>Movement Analysis</h1>
+    <h1>Movement &amp; Motion Analysis</h1>
     <p class="heading-copy">Describe movement, assess its visibility and plausibility, and explain your reasoning.</p>
   </div>
 </section>
@@ -32,8 +32,8 @@
   <div class="panel empty-assessments">
     <span class="empty-icon" aria-hidden="true">↗</span>
     <h3>No assessments available</h3>
-    <p>Create an assessment in Object &amp; Action Identification before recording movement analysis.</p>
-    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action</a>
+    <p>Create an assessment in Object &amp; Action Annotation before recording movement and motion observations.</p>
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('object_action.index') }}">Go to Object &amp; Action Annotation</a>
   </div>
   {% endif %}
 </section>
